@@ -76,6 +76,11 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
+    async def get_tap_user_id(cls, id_):
+        query = select(cls).where(cls.user_id == id_)
+        return (await db.execute(query)).scalar()
+
+    @classmethod
     async def delete(cls, id_):
         query = sqlalchemy_delete(cls).where(cls.id == id_)
         await db.execute(query)
@@ -83,7 +88,7 @@ class AbstractClass:
 
     @classmethod
     async def get_all(cls):
-        return (await db.execute(select(cls))).scalars().all()
+        return (await db.execute(select(cls))).scalars().all().order_by(cls.id)
 
 
 class CreateModel(Base, AbstractClass):

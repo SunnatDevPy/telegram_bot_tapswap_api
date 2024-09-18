@@ -1,9 +1,8 @@
 from aiogram import Bot
-from aiogram.types import InlineKeyboardButton, KeyboardButton
+from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
-from db import User
-from db.models.model import Channels
+from db import User, Channel
 
 
 def link(url):
@@ -34,12 +33,14 @@ def play_game(back):
     return ikb.as_markup()
 
 
-def main_menu(admin=False):
+def main_menu(user_id, admin=False):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🏆Europa Chempionlar🏆", callback_data='game_world'),
               InlineKeyboardButton(text="📞Biz bilan bog'lanish📞", callback_data='game_call'),
               InlineKeyboardButton(text="📍Bizning ijtimoiy tarmoqlar📍", callback_data='game_social'),
               InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
+              InlineKeyboardButton(text="Web App",
+                                   web_app=WebAppInfo(url=f'https://stock-football-mini-app.vercel.app/#/{user_id}'))
               ])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
@@ -73,10 +74,12 @@ def clear():
     ikb.row(InlineKeyboardButton(text='❌', callback_data='clear'))
     return ikb.as_markup()
 
+
 def contact():
     ikb = ReplyKeyboardBuilder()
     ikb.row(KeyboardButton(text='📞 Contact 📞', request_contact=True))
     return ikb.as_markup()
+
 
 def confirm_text():
     ikb = InlineKeyboardBuilder()
@@ -171,7 +174,7 @@ def confirm_channels(title, url):
 
 async def show_channels(bot: Bot):
     ikb = InlineKeyboardBuilder()
-    channels: list['Channels'] = await Channels.get_all()
+    channels: list['Channel'] = await Channel.get_all()
     for i in channels:
         data = await bot.create_chat_invite_link(i.id)
         print(i.id, data.invite_link)

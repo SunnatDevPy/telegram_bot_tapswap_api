@@ -169,7 +169,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
             await call.message.answer('Barchasiga obuna boling',
                                       reply_markup=await make_channels(channels, bot))
     else:
-        await call.message.answer('Bosh menyu', reply_markup=main_menu())
+        await call.message.answer('Bosh menyu', reply_markup=main_menu(call.from_user.id))
 
 
 @game_router.callback_query(F.data.startswith('cup_'))
@@ -268,9 +268,9 @@ async def leagues_handler(call: CallbackQuery, bot: Bot):
         await call.message.delete()
         if call.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
             await call.message.answer(f'Admin {call.from_user.first_name}',
-                                      reply_markup=main_menu(admin=True))
+                                      reply_markup=main_menu(call.from_user.id, admin=True))
         else:
-            await call.message.answer("<b>Bosh menyu</b>", parse_mode='HTML', reply_markup=main_menu())
+            await call.message.answer("<b>Bosh menyu</b>", parse_mode='HTML', reply_markup=main_menu(call.from_user.id))
     if data[-1] == 'settings':
         await call.message.edit_text("<b>⚙️Settings⚙️</b>", parse_mode='HTML', reply_markup=settings())
     if data[-1] == 'country':

@@ -1,4 +1,4 @@
-from sqlalchemy import BIGINT, BigInteger, Text, String, TEXT
+from sqlalchemy import BIGINT, BigInteger, Text, String, TEXT, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db.base import CreateModel
@@ -6,32 +6,37 @@ from db.base import CreateModel
 
 class User(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    username: Mapped[str] = mapped_column(nullable=True)
-    phone: Mapped[str] = mapped_column(nullable=True)
     first_name: Mapped[str] = mapped_column(nullable=True)
     last_name: Mapped[str] = mapped_column(nullable=True)
+    username: Mapped[str] = mapped_column()
+    phone: Mapped[str] = mapped_column(nullable=True)
 
-    coins: Mapped[int] = mapped_column(BigInteger, server_default='0')
-    is_admin: Mapped[bool] = mapped_column(nullable=True)
+    coins: Mapped[int] = mapped_column(BigInteger, default=0)
+    is_admin: Mapped[bool] = mapped_column(default=False)
+    status_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("statusies.id", ondelete='CASCADE'), default=1)
+    bonus: Mapped[int] = mapped_column(default=1)
+    energy: Mapped[int] = mapped_column(default=200)
 
 
-class Network(CreateModel):
+class Experience(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     name: Mapped[str]
-    link: Mapped[str]
+    price: Mapped[int] = mapped_column(BigInteger)
 
 
-class Phone(CreateModel):
+class UserAndExperience(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    name: Mapped[str] = mapped_column(TEXT)
+    user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'), sort_order=1)
+    experience_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("experiences.id", ondelete='CASCADE'), sort_order=1)
 
 
-class About(CreateModel):
+class Statusie(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    name: Mapped[str] = mapped_column(TEXT)
+    name: Mapped[str]
+    limit_coin: Mapped[int] = mapped_column(BigInteger)
 
 
-class Channels(CreateModel):
+class UserAndStatus(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
-    url: Mapped[str] = mapped_column(String())
-    title: Mapped[str] = mapped_column(String())
+    user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'), sort_order=1)
+    status_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("statusies.id", ondelete='CASCADE'), sort_order=1)

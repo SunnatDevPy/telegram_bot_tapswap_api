@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
+from fast_api.experiences import experience
 from fast_api.user import user_router
 
 from db import database
@@ -34,3 +35,4 @@ app.add_middleware(
 )
 
 app.include_router(user_router)
+app.include_router(experience)

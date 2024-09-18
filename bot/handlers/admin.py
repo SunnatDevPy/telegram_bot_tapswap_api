@@ -6,14 +6,14 @@ from aiogram.types import CallbackQuery, Message
 from bot.buttuns.inline import send_text, confirm_inl, link, admins, show_channels, make_channels
 from bot.state.states import SendTextState, AddAdmin, ForwardState
 from db import User
-from db.models.model import Channels
+from db import Channel
 
 admin_router = Router()
 
 
 async def mandatory_channel(user_id, bot: Bot):
     form_kb = []
-    channels = await Channels.get_all()
+    channels = await Channel.get_all()
     for channel_id in channels:
         member = await bot.get_chat_member(channel_id.id, user_id)
         if member.status == ChatMemberStatus.LEFT:

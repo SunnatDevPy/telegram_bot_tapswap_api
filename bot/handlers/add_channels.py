@@ -6,7 +6,7 @@ from aiogram.types import Message, CallbackQuery
 from bot.buttuns.inline import confirm_channels, show_channels
 from bot.detail import channel_detail
 from bot.state.states import ForwardState, AddChannelState
-from db.models.model import Channels
+from db import Channel
 
 channels_router = Router()
 

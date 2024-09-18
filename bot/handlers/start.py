@@ -15,7 +15,8 @@ start_router = Router()
 @start_router.message(CommandStart())
 async def command_start(message: Message, bot: Bot, state: FSMContext):
     if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
-        await message.answer(f'Hush kelibsiz Admin {message.from_user.first_name}', reply_markup=main_menu(admin=True))
+        await message.answer(f'Hush kelibsiz Admin {message.from_user.first_name}',
+                             reply_markup=main_menu(message.from_user.id, admin=True))
     else:
         channels = await mandatory_channel(message.from_user.id, bot)
         if channels:
@@ -34,18 +35,22 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                     reply_markup=contact())
 
             else:
-                await message.answer(f'Hush kelibsiz {message.from_user.first_name}', reply_markup=main_menu())
+                await message.answer(f'Hush kelibsiz {message.from_user.first_name}',
+                                     reply_markup=main_menu(message.from_user.id))
 
 
 @start_router.message(Contact.phone)
 async def command_start(message: Message, bot: Bot):
     user_data = {'id': message.from_user.id, 'username': message.from_user.username,
-                 'full_name': message.from_user.full_name, "phone": message.contact.phone_number}
+                 'first_name': message.from_user.first_name, 'last_name': message.from_user.last_name,
+                 "phone": message.contact.phone_number, 'coins': 0, "status_id": 1, "bonus": 1, "energy": 200}
     if message.contact and message.from_user.id == message.contact.user_id:
         await User.create(**user_data)
         await bot.send_message(int(BOT.ADMIN),
-                               f'Yangi user qo\'shildi @{message.from_user.username}!', reply_markup=main_menu())
+                               f'Yangi user qo\'shildi @{message.from_user.username}!',
+                               reply_markup=main_menu(message.from_user.id))
         await bot.send_message(1353080275,
-                               f'Yangi user qo\'shildi @{message.from_user.username}!', reply_markup=main_menu())
+                               f'Yangi user qo\'shildi @{message.from_user.username}!',
+                               reply_markup=main_menu(message.from_user.id))
     else:
         await message.answer(html.bold("Iltimos o'zingizni contactni yuboring"), reply_markup=contact())
