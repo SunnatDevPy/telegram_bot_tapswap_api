@@ -7,7 +7,7 @@ from bot.buttuns.inline import main_menu, make_channels, contact
 from bot.handlers.admin import mandatory_channel
 from bot.state.states import Contact
 from config import BOT
-from db import User
+from db import User, Statusie
 
 start_router = Router()
 
@@ -41,11 +41,15 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
 
 @start_router.message(Contact.phone)
 async def command_start(message: Message, bot: Bot):
-    user_data = {'id': message.from_user.id, 'username': message.from_user.username,
+    status = await Statusie.get_all()
+    user_data = {'id': int(message.from_user.id), 'username': message.from_user.username,
                  'first_name': message.from_user.first_name, 'last_name': message.from_user.last_name,
-                 "phone": message.contact.phone_number, 'coins': 0, "status_id": 1, "bonus": 1, "energy": 200}
+                 "phone": str(message.contact.phone_number), 'coins': 0, "status_id": int(status[0].id), "bonus": 1,
+                 "energy": 200}
     if message.contact and message.from_user.id == message.contact.user_id:
         await User.create(**user_data)
+        await message.answer(f'Hush kelibsiz {message.from_user.first_name}',
+                             reply_markup=main_menu(message.from_user.id))
         await bot.send_message(int(BOT.ADMIN),
                                f'Yangi user qo\'shildi @{message.from_user.username}!',
                                reply_markup=main_menu(message.from_user.id))

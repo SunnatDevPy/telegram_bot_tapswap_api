@@ -16,6 +16,7 @@ class User(CreateModel):
     status_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("statusies.id", ondelete='CASCADE'), default=1)
     bonus: Mapped[int] = mapped_column(default=1)
     energy: Mapped[int] = mapped_column(default=200)
+    max_energy: Mapped[int] = mapped_column(default=200)
 
 
 class Experience(CreateModel):

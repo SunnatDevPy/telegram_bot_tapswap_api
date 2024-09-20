@@ -78,7 +78,7 @@ def clear():
 def contact():
     ikb = ReplyKeyboardBuilder()
     ikb.row(KeyboardButton(text='📞 Contact 📞', request_contact=True))
-    return ikb.as_markup()
+    return ikb.as_markup(resize_keyboard=True)
 
 
 def confirm_text():

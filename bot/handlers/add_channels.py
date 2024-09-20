@@ -46,7 +46,7 @@ async def clear_channel(call: CallbackQuery, bot: Bot, state: FSMContext):
         await state.set_state(AddChannelState.chat_id)
         await call.message.answer('Chat id ni kiriting')
     if data[1] == 'clear':
-        await Channels.delete(int(data[-1]))
+        await Channel.delete(int(data[-1]))
         await call.answer(f'Kanal o\'chdi {data[-1]}', show_alert=True)
         await call.message.edit_text('Kanallar ro\'yxati',
                                      reply_markup=await show_channels(bot=bot))
@@ -77,7 +77,7 @@ async def confirm_channelss(call: CallbackQuery, state: FSMContext, bot: Bot) ->
         channel = data['info_chat']
         try:
             # link = await bot.create_chat_invite_link(channel.id)
-            await Channels.create(id=int(channel.id), url=channel.invite_link, title=channel.title)
+            await Channel.create(id=int(channel.id), url=channel.invite_link, title=channel.title)
         except TelegramBadRequest as e:
             await call.message.answer('Kanalda yo\'qmanku')
         await call.message.delete()

@@ -88,7 +88,7 @@ class AbstractClass:
 
     @classmethod
     async def get_all(cls):
-        return (await db.execute(select(cls))).scalars().all().order_by(cls.id)
+        return (await db.execute(select(cls))).scalars().all()
 
 
 class CreateModel(Base, AbstractClass):

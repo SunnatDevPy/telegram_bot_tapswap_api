@@ -37,7 +37,7 @@ class ExperiencePatch(BaseModel):
 
 
 @experience.patch("/{experience_id}", response_model=ExperiencePatch)
-async def user_patch(user_id: int, item: ExperiencePatch):
+async def experience_patch(user_id: int, item: ExperiencePatch):
     experience = await Experience.get(user_id)
     if experience:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -51,7 +51,7 @@ async def user_patch(user_id: int, item: ExperiencePatch):
 
 
 @experience.put("/{experience_id}", response_model=ExperienceAdd)
-async def user_put(user_id: int, items: ExperienceAdd):
+async def experience_put(user_id: int, items: ExperienceAdd):
     experience = await Experience.get(user_id)
     if experience:
         await User.update(experience.id, **items.dict())
@@ -61,6 +61,6 @@ async def user_put(user_id: int, items: ExperienceAdd):
 
 
 @experience.delete("/{experience_id}")
-async def user_delete(experience_id: int):
+async def experience_delete(experience_id: int):
     await Experience.delete(experience_id)
     return {"ok": True, 'id': experience_id}

@@ -1,10 +1,12 @@
 from contextlib import asynccontextmanager
+from typing import List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from fast_api.experiences import experience
+from fast_api.statusiec import status_router
 from fast_api.user import user_router
 
 from db import database
@@ -29,10 +31,13 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # Список допустимых источников
-    allow_credentials=True,  # Разрешить отправку кук (если нужно)
+    allow_credentials=False,  # Разрешить отправку кук (если нужно)
     allow_methods=["*"],  # Разрешить все методы (GET, POST, и т.д.)
     allow_headers=["*"],  # Разрешить все заголовки
 )
 
 app.include_router(user_router)
 app.include_router(experience)
+app.include_router(status_router)
+
+
