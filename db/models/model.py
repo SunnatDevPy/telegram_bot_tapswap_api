@@ -23,6 +23,7 @@ class Experience(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True)
     name: Mapped[str]
     price: Mapped[int] = mapped_column(BigInteger)
+    hour_coin: Mapped[int] = mapped_column(BigInteger)
 
 
 class UserAndExperience(CreateModel):

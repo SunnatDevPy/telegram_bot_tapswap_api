@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from db import User
+from fast_api.utils import hour_coin
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -34,15 +35,6 @@ class UserList(BaseModel):
     bonus: Optional[int] = None
     energy: Optional[int] = None
     max_energy: Optional[int] = None
-
-
-async def increase_energy(user_id, energy, max_energy):
-    while True:
-        if max_energy == energy:
-            break
-        energy += 1
-        await User.update(user_id, energy=energy)
-        await asyncio.sleep(1)
 
 
 @user_router.post("")
@@ -75,21 +67,36 @@ class UserCoin(BaseModel):
     energy: int = None
 
 
+active_tasks = {}
+
+
 @user_router.get("/{user_id}")
 async def user_detail(user_id: int):
     user = await User.get(user_id)
-    return {"detail": user}
+    return {"user": user, "hour_coin_profit": hour_coin(user.id)}
+
+
+async def increase_energy(user_id, energy, max_energy):
+    while max_energy != energy:
+        energy += 1
+        await User.update(user_id, energy=energy)
+        await asyncio.sleep(0.5)
 
 
 # coin energy update
 @user_router.patch("/coin/{user_id}", response_model=UserCoin)
-async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
+async def user_patch(user_id: int, item: Annotated[UserCoin, Depends()]):
     user = await User.get(user_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
             await User.update(user_id, **update_data)
-            await increase_energy(user_id, item.energy, user.max_energy)
+
+            if user_id in active_tasks:
+                active_tasks[user_id].cancel()
+
+            task = asyncio.create_task(increase_energy(user_id, item.energy, user.max_energy))
+            active_tasks[user_id] = task
             return {"ok": True, "data": update_data}
         else:
             return {"ok": False, "message": "Nothing to update"}
