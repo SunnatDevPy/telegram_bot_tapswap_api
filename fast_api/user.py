@@ -1,3 +1,4 @@
+import asyncio
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -14,17 +15,34 @@ class UserAdd(BaseModel):
     username: Optional[str] = None
     phone: str
     is_admin: Optional[bool] = False
-
-    status_id: id
+    status_id: int
     coins: int
     bonus: int
     energy: int
     max_energy: int
 
 
-class UserOk(BaseModel):
-    ok: bool = True
-    id: int
+class UserList(BaseModel):
+    id: Optional[int] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    phone: Optional[str] = None
+    is_admin: Optional[bool] = False
+    status_id: Optional[int] = None
+    coins: Optional[int] = None
+    bonus: Optional[int] = None
+    energy: Optional[int] = None
+    max_energy: Optional[int] = None
+
+
+async def increase_energy(user_id, energy, max_energy):
+    while True:
+        if max_energy == energy:
+            break
+        energy += 1
+        await User.update(user_id, energy=energy)
+        await asyncio.sleep(1)
 
 
 @user_router.post("")
@@ -34,7 +52,7 @@ async def user_add(user: Annotated[UserAdd, Depends()]):
 
 
 @user_router.get('')
-async def user_list() -> list[UserAdd]:
+async def user_list() -> list[UserList]:
     users = await User.get_all()
     return users
 
@@ -45,12 +63,11 @@ class UserPatch(BaseModel):
     username: Optional[str] = None
     phone: Optional[str] = None
     is_admin: Optional[bool] = False
-
-    status_id: id = None
-    coins: int = None
-    bonus: int = None
-    energy: int = None
-    max_energy: int
+    status_id: Optional[int] = None
+    coins: Optional[int] = None
+    bonus: Optional[int] = None
+    energy: Optional[int] = None
+    max_energy: Optional[int] = None
 
 
 class UserCoin(BaseModel):
@@ -64,30 +81,24 @@ async def user_detail(user_id: int):
     return {"detail": user}
 
 
-# @user_router.patch("coin/{user_id}", response_model=UserCoin)
-# async def user_patch(user_id: int, item: UserCoin):
-#     user = await User.get(user_id)
-#     if user:
-#         coin = 0
-#         energy = 0
-#         if item.minus == '+':
-#             coin = user.coins + item.coins
-#             energy = user.energy + item.coins if item.energy != 0 else 0
-#         elif item.minus == '-':
-#             coin = user.coins - item.coins
-#             energy = user.energy - item.coins if item.energy != 0 else 0
-#         update_data = {k: v for k, v in item.dict().items() if v is not None}
-#         if update_data:
-#             await User.update(user_id, coins=int(coin), energy=energy)
-#             return {"ok": True, "data": update_data}
-#         else:
-#             return {"ok": False, "message": "Nothing to update"}
-#     else:
-#         raise HTTPException(status_code=404, detail="Item not found")
+# coin energy update
+@user_router.patch("/coin/{user_id}", response_model=UserCoin)
+async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
+    user = await User.get(user_id)
+    if user:
+        update_data = {k: v for k, v in item.dict().items() if v is not None}
+        if update_data:
+            await User.update(user_id, **update_data)
+            await increase_energy(user_id, item.energy, user.max_energy)
+            return {"ok": True, "data": update_data}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
 
 
-@user_router.patch("/{user_id}", response_model=UserPatch)
-async def user_patch(user_id: int, item: UserPatch):
+@user_router.patch("/{user_id}")
+async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
     user = await User.get(user_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -96,16 +107,6 @@ async def user_patch(user_id: int, item: UserPatch):
             return {"ok": True, "data": update_data}
         else:
             return {"ok": False, "message": "Nothing to update"}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-
-@user_router.put("/{user_id}", response_model=UserAdd)
-async def user_put(user_id: int, items: UserAdd):
-    user = await User.get(user_id)
-    if user:
-        await User.update(user.id, **items.dict())
-        return {"ok": True, "data": items}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 

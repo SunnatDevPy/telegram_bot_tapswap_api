@@ -45,3 +45,5 @@ if __name__ == '__main__':
 # 1071  docker push nickname/name
 
 # docker run --name db_mysql -e MYSQL_ROOT_PASSWORD=1 -d mysql
+
+
