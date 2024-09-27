@@ -31,3 +31,16 @@ async def get_detail_experience(data):
             }
         )
     return list_
+
+
+async def top_players_from_statu():
+    list_ = {}
+    for i in await Statusie.get_all():
+        users: list['User'] = await User.get_from_type(i.id)
+        s = []
+        for son, j in enumerate(users):
+            s.append({"user_id": j.id, "status": i.name, "coin": j.coins, "first_name": j.first_name,
+                      "username": j.username})
+            user = s[son]
+        list_.update({f"{i.name}": s[:11], f"user_orin_{son}": 1})
+    return list_

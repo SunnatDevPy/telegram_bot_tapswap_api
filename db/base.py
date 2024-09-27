@@ -81,6 +81,11 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
+    async def get_from_type(cls, type):
+        query = select(cls).where(cls.status_id == type).order_by(cls.coins)
+        return (await db.execute(query)).scalars()
+
+    @classmethod
     async def get_from_user_id(cls, id_):
         query = select(cls).where(cls.user_id == id_)
         return (await db.execute(query)).scalars()

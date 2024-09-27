@@ -8,7 +8,7 @@ from pydantic import BaseModel
 
 from db import User, Statusie
 from db.models.model import Referral, UserAndExperience
-from fast_api.utils import hour_coin_check, get_detail_experience
+from fast_api.utils import hour_coin_check, get_detail_experience, top_players_from_statu
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -83,7 +83,8 @@ async def user_detail(user_id: int):
         status = await Statusie.get(user.status_id)
         # friends = await Referral.get_from_user_id(user_id)
         experience = await UserAndExperience.get_from_user_id_experience(user_id)
-        return {"user_data": user, "status": status, 'experience': await get_detail_experience(experience), 'hour_coin': await hour_coin_check(user_id)}
+        return {"user_data": user, "status": status, 'experience': await get_detail_experience(experience),
+                'hour_coin': await hour_coin_check(user_id), "top_10": await top_players_from_statu()}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 

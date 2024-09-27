@@ -5,6 +5,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from requests import Response
 
 from db import User, Experience
 from db.models.model import UserAndExperience
@@ -36,6 +37,7 @@ async def save_numbers_every_hour(user_id):
 async def experience_activate_degree(user_id: int, activate: bool):
     users = await User.get(user_id)
     if users and activate:
+
         hour = await save_numbers_every_hour(user_id)
         await User.update(user_id, coins=users.coins + hour.get('coin'))
         return {'ok': True, "user": users, "response": hour}
