@@ -7,7 +7,8 @@ from bot.buttuns.inline import main_menu, make_channels, contact
 from bot.handlers.admin import mandatory_channel
 from bot.state.states import Contact
 from config import BOT
-from db import User, Statusie
+from db import User, Statusie, Experience
+from db.models.model import UserAndExperience
 
 start_router = Router()
 
@@ -46,7 +47,11 @@ async def command_start(message: Message, bot: Bot):
                  "phone": str(message.contact.phone_number), 'coins': 0, "status_id": int(status[0].id), "bonus": 1,
                  "energy": 200, "max_energy": 200}
     if message.contact and message.from_user.id == message.contact.user_id:
-        await User.create(**user_data)
+        user = await User.create(**user_data)
+        experience = await Experience.get_all()
+        for i in experience:
+            await UserAndExperience.create(user_id=user.id, degree=i.degree, hour_coin=i.hour_coin, price=i.price,
+                                           experience_id=i.id)
         await message.answer(f'Hush kelibsiz {message.from_user.first_name}',
                              reply_markup=main_menu(message.from_user.id))
         await bot.send_message(int(BOT.ADMIN),

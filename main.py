@@ -2,9 +2,10 @@ from contextlib import asynccontextmanager
 from typing import List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
 
+from fastapi_cors import CORS
 from fast_api.experiences import experience
 from fast_api.statusiec import status_router
 from fast_api.user import user_router
@@ -18,20 +19,14 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, debug=False)
+app = FastAPI(lifespan=lifespan, debug=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-    "https://example.com",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # Список допустимых источников
-    allow_credentials=False,  # Разрешить отправку кук (если нужно)
+    allow_origins=["*"],  # Список допустимых источников
+    allow_credentials=True,  # Разрешить отправку кук (если нужно)
     allow_methods=["*"],  # Разрешить все методы (GET, POST, и т.д.)
     allow_headers=["*"],  # Разрешить все заголовки
 )
@@ -73,6 +68,7 @@ class ConnectionManager:
 
 
 manager = ConnectionManager()
+
 
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):

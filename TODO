@@ -1,3 +1,40 @@
+TODO
+
+db
+    1) User (full_name, username, phone, coins, status_id, bonus, energy, max_energy, is_admin)
+    2) Status (name, limit_coin)
+    3) Experience (name, photo, degree, price, hour_coin)
+    4) UserAndExperience (user_id, experience_id, degree, price, hour_coin)
+    5) Refferal (from_user_id, to_user_id, profit)
+
+
+1) User: post, get, patch
+    patch: energy, coin, user_id
+        1) energiya avto to'lishi
+        2) coin qo'shish yoki update qilish
+        3) status o'zgarish
+    get:
+        Barcha malumot yuborish
+        User
+        Status
+        Soatiga foyda
+
+    post: user_id, activate profit
+        1) hour profit
+
+2) Status: post, delete, get, patch
+    Add, delete, update, get
+
+3) Status: post, delete, get, patch
+    Add, delete, update, get
+
+
+
+
+
+
+
+
 
 
 
