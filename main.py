@@ -7,6 +7,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from fastapi_cors import CORS
 from fast_api.experiences import experience
+from fast_api.referrals import referral_router
 from fast_api.statusiec import status_router
 from fast_api.user import user_router
 
@@ -34,6 +35,7 @@ app.add_middleware(
 app.include_router(user_router)
 app.include_router(experience)
 app.include_router(status_router)
+app.include_router(referral_router)
 
 
 @app.websocket("/ws")

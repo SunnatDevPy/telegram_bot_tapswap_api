@@ -9,7 +9,7 @@ from db.models.model import UserAndExperience
 from fast_api.utils import hour_coin_check, get_detail_experience, top_players_from_statu, friends_detail, \
     top_players_from_statu_rank
 
-user_router = APIRouter(prefix='/users', tags=['User'])
+questions_router = APIRouter(prefix='/questions', tags=['Questions'])
 
 
 class UserAdd(BaseModel):
@@ -38,13 +38,13 @@ class UserList(BaseModel):
     max_energy: Optional[int] = None
 
 
-@user_router.post("")
+@questions_router.post("")
 async def user_add(user: Annotated[UserAdd, Depends()]):
     user = await User.create(**user.dict())
     return {'ok': True, "id": user.id}
 
 
-@user_router.get('')
+@questions_router.get('')
 async def user_list() -> list[UserList]:
     users = await User.get_all()
     return users
@@ -76,7 +76,7 @@ async def update_status(user):
         return
 
 
-@user_router.get("/{user_id}")
+@questions_router.get("/{user_id}")
 async def user_detail(user_id: int):
     user = await User.get(user_id)
     if user:
@@ -102,7 +102,7 @@ async def increase_energy(user_id, energy, max_energy):
 
 
 # coin energy update
-@user_router.patch("/{user_id}")
+@questions_router.patch("/{user_id}")
 async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
     user = await User.get(user_id)
     if user:
@@ -121,7 +121,7 @@ async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@user_router.delete("/{user_id}")
+@questions_router.delete("/{user_id}")
 async def user_delete(user_id: int):
     await User.delete(user_id)
     return {"ok": True, 'id': user_id}

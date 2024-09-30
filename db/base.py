@@ -1,4 +1,4 @@
-from sqlalchemy import delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, select, func
+from sqlalchemy import delete as sqlalchemy_delete, DateTime, update as sqlalchemy_update, select, func, desc
 from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine, AsyncSession
 from sqlalchemy.orm import DeclarativeBase, declared_attr, sessionmaker, Mapped, mapped_column
 
@@ -82,7 +82,12 @@ class AbstractClass:
 
     @classmethod
     async def get_from_type(cls, type):
-        query = select(cls).where(cls.status_id == type).order_by(cls.coins)
+        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins)).limit(11)
+        return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def get_from_type_rank(cls, type_):
+        query = select(cls).where(cls.status_id == type_).order_by(desc(cls.coins))
         return (await db.execute(query)).scalars()
 
     @classmethod

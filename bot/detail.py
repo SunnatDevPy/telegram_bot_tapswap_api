@@ -1,5 +1,9 @@
+import datetime
+
 import bcrypt
 from aiogram.utils.text_decorations import html_decoration
+
+from db import User
 
 
 def hello(first_name):
@@ -18,3 +22,7 @@ Username: {chat.username}
 Count users: {chat.get_member_count()}
     ''')
     return text
+
+# date_format = '%Y-%m-%d %H:%M:%S'
+#
+# print(datetime.datetime.strptime(date_format))
