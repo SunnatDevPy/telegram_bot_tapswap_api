@@ -1,4 +1,4 @@
-from sqlalchemy import BIGINT, BigInteger, String, ForeignKey, TEXT, Integer
+from sqlalchemy import BIGINT, BigInteger, String, ForeignKey, TEXT, Integer, Boolean
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db.base import CreateModel
@@ -16,6 +16,8 @@ class User(CreateModel):
     bonus: Mapped[int] = mapped_column(default=1)
     energy: Mapped[int] = mapped_column(default=200)
     max_energy: Mapped[int] = mapped_column(default=200)
+    ball: Mapped[int] = mapped_column(default=0)
+
 
 
 class Experience(CreateModel):
@@ -58,7 +60,7 @@ class ParamQuestion(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'), sort_order=1, index=True)
     question_id: Mapped[int] = mapped_column(BIGINT, ForeignKey('questionss.id', ondelete="CASCADE"), index=True)
-    answer: Mapped[bool] = mapped_column(String, default=False)
+    answer: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Referral(CreateModel):

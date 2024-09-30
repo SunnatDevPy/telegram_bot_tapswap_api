@@ -66,6 +66,17 @@ class AbstractClass:
         await cls.commit()
 
     @classmethod
+    async def update_question(cls, id_, question_id, **kwargs):
+        query = (
+            sqlalchemy_update(cls)
+            .where(cls.id == id_, cls.question_id == question_id)
+            .values(**kwargs)
+            .execution_options(synchronize_session="fetch")
+        )
+        await db.execute(query)
+        await cls.commit()
+
+    @classmethod
     async def get_admins(cls):
         query = select(cls).where(cls.is_admin == True)
         return (await db.execute(query)).scalars()

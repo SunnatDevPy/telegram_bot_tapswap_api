@@ -1,17 +1,18 @@
 from contextlib import asynccontextmanager
-from typing import List
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from starlette.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
+from starlette.staticfiles import StaticFiles
 
-from fastapi_cors import CORS
+from db import database
 from fast_api.experiences import experience
+from fast_api.questions import scheduler, questions_router
 from fast_api.referrals import referral_router
 from fast_api.statusiec import status_router
 from fast_api.user import user_router
 
-from db import database
+
+# Запускаем планировщик при старте приложения
 
 
 @asynccontextmanager
@@ -23,6 +24,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, debug=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
+
+@app.on_event("startup")
+async def startup_event():
+    scheduler.start()
+
+
+# Останавливаем планировщик при завершении работы приложения
+@app.on_event("shutdown")
+async def shutdown_event():
+    scheduler.shutdown()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,6 +49,7 @@ app.include_router(user_router)
 app.include_router(experience)
 app.include_router(status_router)
 app.include_router(referral_router)
+app.include_router(questions_router)
 
 
 @app.websocket("/ws")
