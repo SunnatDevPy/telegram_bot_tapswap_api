@@ -1,20 +1,22 @@
-from aiogram import Router, Bot, html
+from aiogram import Router, Bot, html, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 
-from bot.buttuns.inline import main_menu, make_channels, contact
+from bot.buttuns.inline import main_menu, make_channels, contact, language_inl
 from bot.handlers.admin import mandatory_channel
 from bot.state.states import Contact
 from config import BOT
 from db import User, Statusie, Experience
 from db.models.model import UserAndExperience, Referral
+from aiogram.utils.i18n import gettext as _
 
 start_router = Router()
 
 
 @start_router.message(CommandStart())
 async def command_start(message: Message, bot: Bot, state: FSMContext):
+    await message.answer(_('Til tanlang'), reply_markup=language_inl())
     if ' ' in message.text:
         args = message.text.split(' ')[1]
         print(args)
@@ -30,29 +32,6 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                 await User.update(inviter_id, coins=user.coins + 5000)
             else:
                 await state.update_data(referred_id=inviter_id, referred_user_id=message.from_user.id)
-
-    channels = await mandatory_channel(message.from_user.id, bot)
-    if channels:
-        try:
-            await message.edit_text('Barchasiga obuna boling',
-                                    reply_markup=await make_channels(channels, bot))
-        except:
-            await message.answer('Barchasiga obuna boling',
-                                 reply_markup=await make_channels(channels, bot))
-    else:
-        user = await User.get(message.from_user.id)
-        if not user:
-            await state.set_state(Contact.phone)
-            await message.answer(
-                f'Assalomu aleykum {message.from_user.first_name},davom etish uchun contact yuboring',
-                reply_markup=contact())
-        else:
-            if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
-                await message.answer(f'Hush kelibsiz Admin {message.from_user.first_name}',
-                                     reply_markup=main_menu(message.from_user.id, admin=True))
-            else:
-                await message.answer(f'Hush kelibsiz {message.from_user.first_name}',
-                                     reply_markup=main_menu(message.from_user.id))
 
 
 @start_router.message(Contact.phone)
@@ -73,12 +52,15 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
         experience = await Experience.get_all()
         for i in experience:
             await UserAndExperience.create(user_id=user.id, degree=i.degree, hour_coin=i.hour_coin, price=i.price,
-                                           experience_id=i.id, energy=0, bonus=0)
-        await message.answer(f'Hush kelibsiz {message.from_user.first_name}',
+                                           experience_id=i.id)
+            await message.answer("", reply_markup=ReplyKeyboardRemove())
+        xush = _("Xush kelibsiz")
+        await message.answer(f'{xush} {message.from_user.first_name}',
                              reply_markup=main_menu(message.from_user.id))
+
         await bot.send_message(int(BOT.ADMIN),
                                f'Yangi user qo\'shildi @{message.from_user.username}!')
         await bot.send_message(1353080275,
                                f'Yangi user qo\'shildi @{message.from_user.username}!')
     else:
-        await message.answer(html.bold("Iltimos o'zingizni contactni yuboring"), reply_markup=contact())
+        await message.answer(html.bold(_("Iltimos o'zingizni contactni yuboring")), reply_markup=contact())

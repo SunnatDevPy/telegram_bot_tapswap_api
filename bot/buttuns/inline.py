@@ -11,6 +11,14 @@ def link(url):
     return ikb.as_markup()
 
 
+def language_inl():
+    ikb = InlineKeyboardBuilder()
+    ikb.add(*[InlineKeyboardButton(text='🇺🇿Uz', callback_data='lang_uz'),
+              InlineKeyboardButton(text='🇷🇺Ru', callback_data='lang_rus')])
+    ikb.adjust(2)
+    return ikb.as_markup()
+
+
 async def admins():
     ikb = InlineKeyboardBuilder()
     for i in await User.get_admins():
@@ -33,15 +41,16 @@ def play_game(back):
     return ikb.as_markup()
 
 
-def main_menu(user_id, admin=False):
+def main_menu(user_id, admin=False, language='uz'):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🏆Europa Chempionlar🏆", callback_data='game_world'),
               InlineKeyboardButton(text="📞Biz bilan bog'lanish📞", callback_data='game_call'),
               InlineKeyboardButton(text="📍Bizning ijtimoiy tarmoqlar📍", callback_data='game_social'),
               InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
+              InlineKeyboardButton(text="🏳Til o'zgartirish🏳", callback_data='game_language'),
               InlineKeyboardButton(text="Web App",
-                                   web_app=WebAppInfo(url=f'https://stock-football-mini-app.vercel.app/#/{user_id}'))
-              ])
+                                   web_app=WebAppInfo(
+                                       url=f'https://stock-football-mini-app.vercel.app/#/{user_id}?language={language}'))])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
     ikb.adjust(1, 2, 1, repeat=True)

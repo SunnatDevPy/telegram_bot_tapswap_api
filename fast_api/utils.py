@@ -51,12 +51,12 @@ async def get_detail_experience(data):
 
 
 async def friends_detail(user_id):
-    list_ = {}
+    list_ = []
     friends_price = 0
     for i in await Referral.get_from_referral_id(user_id):
         user: User = await User.get(i.referred_user_id)
         status: Statusie = await Statusie.get(user.status_id)
-        list_.update({"user_id": user.id, "values": {"status": status.name, "coin": user.coins,
+        list_.append({"user_id": user.id, "values": {"status": status.name, "coin": user.coins,
                                                      "first_name": user.first_name,
                                                      "username": user.username,
                                                      "benefit": int((user.coins * 2.5) / 100)}})

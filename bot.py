@@ -4,11 +4,13 @@ import sys
 
 from aiogram import Dispatcher, Bot
 from aiogram.types import BotCommand
+from aiogram.utils.i18n import FSMI18nMiddleware, I18n
 
 from bot.handlers.add_channels import channels_router
 from bot.handlers.admin import admin_router
 from bot.handlers.game import game_router
 from bot.handlers.start import start_router
+from bot.language import language_router
 from config import conf
 from db import database
 
@@ -27,7 +29,9 @@ async def on_shutdown(bot: Bot):
 
 async def main():
     dp = Dispatcher()
-    dp.include_routers(start_router, game_router, admin_router, channels_router)
+    i18n = I18n(path="locales", default_locale='uz')
+    dp.update.outer_middleware(FSMI18nMiddleware(i18n))
+    dp.include_routers(start_router, game_router, admin_router, channels_router, language_router)
     dp.startup.register(on_start)
     dp.shutdown.register(on_shutdown)
     # dp.callback_query.outer_middleware(ConfirmChannelMiddleware())
