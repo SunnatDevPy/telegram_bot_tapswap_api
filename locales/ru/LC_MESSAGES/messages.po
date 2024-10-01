@@ -1,0 +1,144 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2024 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2024-10-01 16:03+0500\n"
+"PO-Revision-Date: 2024-10-01 14:46+0500\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: bot/language.py:19
+msgid "Til tanlandi"
+msgstr ""
+
+#: bot/handlers/game.py:48 bot/handlers/game.py:51 bot/handlers/game.py:91
+#: bot/handlers/game.py:94 bot/handlers/game.py:117 bot/handlers/game.py:120
+#: bot/handlers/game.py:146 bot/handlers/game.py:149 bot/handlers/game.py:169
+#: bot/handlers/game.py:172 bot/handlers/game.py:183 bot/handlers/game.py:186
+#: bot/handlers/game.py:206 bot/handlers/game.py:209 bot/handlers/game.py:252
+#: bot/handlers/game.py:255 bot/language.py:23 bot/language.py:26
+msgid "Barchasiga obuna boling"
+msgstr "Подписаться на все"
+
+#: bot/language.py:30
+msgid "Assalomu aleykum"
+msgstr "Сдраствуйте"
+
+#: bot/language.py:31
+msgid "davom etish uchun contact yuboring"
+msgstr "отправьте контакт, чтобы продолжить."
+
+#: bot/handlers/start.py:57 bot/language.py:32
+msgid "Xush kelibsiz"
+msgstr "Добро пожаловать"
+
+#: bot/handlers/game.py:57
+msgid "<b>Jahon o'yinlari</b>"
+msgstr "<b>Всемирные игры</b>"
+
+#: bot/handlers/game.py:59
+msgid "<b>Davlatni tanlang</b>"
+msgstr "<b>Выберите страну</b>"
+
+#: bot/handlers/game.py:65
+msgid "Ma'lumot yo'q"
+msgstr "Нет информации"
+
+#: bot/handlers/game.py:70
+msgid "Bizning ijtimoiy tarmoqlar"
+msgstr "Наши социальные сети"
+
+#: bot/handlers/game.py:73 bot/handlers/game.py:79
+msgid "Ma'lumot yo'q!"
+msgstr "Никакой информации!"
+
+#: bot/handlers/game.py:83
+msgid "<b>️Til tanlang!</b>"
+msgstr "<b>️Выберите язык!</b>"
+
+#: bot/handlers/game.py:103
+msgid "live o'yinlari"
+msgstr "живые игры"
+
+#: bot/handlers/game.py:106 bot/handlers/game.py:135
+msgid "Batafsil"
+msgstr "Подробнее"
+
+#: bot/handlers/game.py:131
+msgid "oldingi natija"
+msgstr "предыдущий результат"
+
+#: bot/handlers/game.py:175
+#, fuzzy
+msgid "Bosh menu"
+msgstr "<b>Главное меню</b>"
+
+#: bot/handlers/game.py:276
+msgid "<b>Bosh menu</b>"
+msgstr "<b>Главное меню</b>"
+
+#: bot/handlers/game.py:282 bot/handlers/game.py:285
+msgid "<b>Davlatlar️</b>"
+msgstr "<b>Страни</b>"
+
+#: bot/handlers/resp.py:43 bot/handlers/resp.py:64
+msgid "⌛Boshlangan vaqti (Toshkent)"
+msgstr "⌛Время начала (Ташкент)"
+
+#: bot/handlers/resp.py:44 bot/handlers/resp.py:65
+msgid "Bosqich"
+msgstr "Уровень"
+
+#: bot/handlers/resp.py:45 bot/handlers/resp.py:66
+msgid "Uyda"
+msgstr "Дома"
+
+#: bot/handlers/resp.py:46 bot/handlers/resp.py:67
+msgid "Goal"
+msgstr "Гол"
+
+#: bot/handlers/resp.py:47 bot/handlers/resp.py:68
+msgid "Mehmonda"
+msgstr "В гостях"
+
+#: bot/handlers/resp.py:69
+msgid "Penalty"
+msgstr "Пенальти"
+
+#: bot/handlers/resp.py:70
+msgid "Extra time"
+msgstr "Дополнительное время"
+
+#: bot/handlers/resp.py:84
+msgid "Goal urdi"
+msgstr "Гол забит"
+
+#: bot/handlers/resp.py:85
+msgid "oldi"
+msgstr "получено"
+
+#: bot/handlers/resp.py:91
+msgid "Player"
+msgstr "Игрок"
+
+#: bot/handlers/start.py:19
+#, fuzzy
+msgid "Til tanlang"
+msgstr "<b>️Выберите язык!</b>"
+
+#: bot/handlers/start.py:66
+msgid "Iltimos o'zingizni contactni yuboring"
+msgstr "Пожалуйста, отправьте свой контакт"
+
