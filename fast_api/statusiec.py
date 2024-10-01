@@ -11,6 +11,7 @@ status_router = APIRouter(prefix='/status', tags=['Status'])
 class StatusAdd(BaseModel):
     name: str
     limit_coin: int
+    level: int
 
 
 @status_router.post("")
@@ -34,6 +35,7 @@ async def status_detail(status_id: int):
 class StatusPatch(BaseModel):
     name: str
     limit_coin: int
+    level: int
 
 
 @status_router.patch("/{status_id}", response_model=StatusPatch)
