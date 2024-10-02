@@ -54,8 +54,9 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
         for i in experience:
             await UserAndExperience.create(user_id=user.id, degree=i.degree, hour_coin=i.hour_coin, price=i.price,
                                            experience_id=i.id)
-        await message.answer("Assalomu aleykum bu bo't orqali Futbol bo'yicha ma'lumotlarga ega bo'lasiz",
-                             reply_markup=ReplyKeyboardRemove())
+        await message.answer(
+            "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin",
+            reply_markup=ReplyKeyboardRemove())
         if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
             await message.answer(f'Xush kelibsiz Admin {message.from_user.first_name}',
                                  reply_markup=main_menu(message.from_user.id, admin=True))
