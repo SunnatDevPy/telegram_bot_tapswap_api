@@ -50,7 +50,7 @@ def main_menu(user_id, admin=False, language='uz'):
               InlineKeyboardButton(text="🏳Til o'zgartirish🏳", callback_data='game_language'),
               InlineKeyboardButton(text="Web App",
                                    web_app=WebAppInfo(
-                                       url=f'https://stock-football-mini-app.vercel.app/#/{user_id}?language={language}'))])
+                                       url=f'https://stock-football-mini-app.vercel.app/#/{user_id}/{language}/'))])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
     ikb.adjust(1, 2, 1, repeat=True)
