@@ -34,7 +34,7 @@ msgstr "Подписаться на все"
 
 #: bot/language.py:30
 msgid "Assalomu aleykum"
-msgstr "Мир вам"
+msgstr "Здравствуйте"
 
 #: bot/language.py:31
 msgid "davom etish uchun contact yuboring"

@@ -6,18 +6,17 @@ from db.base import CreateModel
 
 class User(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
-    first_name: Mapped[str] = mapped_column(nullable=True)
-    last_name: Mapped[str] = mapped_column(nullable=True)
-    username: Mapped[str] = mapped_column()
-    phone: Mapped[str] = mapped_column(nullable=True)
-    coins: Mapped[int] = mapped_column(BigInteger, default=0, index=True)
-    is_admin: Mapped[bool] = mapped_column(default=False)
-    status_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("statusies.id", ondelete='CASCADE'), default=1)
-    bonus: Mapped[int] = mapped_column(default=1)
-    energy: Mapped[int] = mapped_column(default=200)
-    max_energy: Mapped[int] = mapped_column(default=200)
-    ball: Mapped[int] = mapped_column(default=0)
-
+    first_name: Mapped[str] = mapped_column(String, nullable=True)
+    last_name: Mapped[str] = mapped_column(String, nullable=True)
+    username: Mapped[str] = mapped_column(String, nullable=True)
+    phone: Mapped[str] = mapped_column(String, nullable=True)
+    coins: Mapped[int] = mapped_column(BigInteger, default=0)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
+    status_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("statusies.id", ondelete='CASCADE'))
+    bonus: Mapped[int] = mapped_column(Integer, default=1)
+    energy: Mapped[int] = mapped_column(Integer, default=200)
+    max_energy: Mapped[int] = mapped_column(Integer, default=200)
+    ball: Mapped[int] = mapped_column(Integer, default=0)
 
 
 class Experience(CreateModel):

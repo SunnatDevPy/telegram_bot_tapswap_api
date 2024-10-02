@@ -37,27 +37,31 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
 @start_router.message(Contact.phone)
 async def command_start(message: Message, bot: Bot, state: FSMContext):
     data = await state.get_data()
-    print(data)
     status = await Statusie.get_all()
-    user_data = {'id': int(message.from_user.id), 'username': message.from_user.username,
-                 'first_name': message.from_user.first_name, 'last_name': message.from_user.last_name,
-                 "phone": str(message.contact.phone_number), 'coins': 0, "status_id": int(status[0].id), "bonus": 1,
-                 "energy": 200, "max_energy": 200}
     if message.contact and message.from_user.id == message.contact.user_id:
-        user = await User.create(**user_data)
+
+        user = await User.create(id=message.from_user.id, last_name=message.from_user.last_name,
+                                 first_name=message.from_user.first_name,
+                                 username=message.from_user.username, phone=str(message.contact.phone_number), coins=0,
+                                 is_admin=False, status_id=status[0].id, bonus=1, energy=200, max_energy=200)
+
         if data.get("referred_id") and data.get("referred_user_id"):
             user = await User.get(data.get("referred_id"))
             await Referral.create(referrer_id=data.get("referred_id"), referred_user_id=data.get("referred_user_id"))
             await User.update(user.id, coins=user.coins + 5000)
         experience = await Experience.get_all()
+        xush = _("Xush kelibsiz")
         for i in experience:
             await UserAndExperience.create(user_id=user.id, degree=i.degree, hour_coin=i.hour_coin, price=i.price,
                                            experience_id=i.id)
-            await message.answer("", reply_markup=ReplyKeyboardRemove())
-        xush = _("Xush kelibsiz")
-        await message.answer(f'{xush} {message.from_user.first_name}',
-                             reply_markup=main_menu(message.from_user.id))
-
+        await message.answer("Assalomu aleykum bu bo't orqali Futbol bo'yicha ma'lumotlarga ega bo'lasiz",
+                             reply_markup=ReplyKeyboardRemove())
+        if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
+            await message.answer(f'Xush kelibsiz Admin {message.from_user.first_name}',
+                                 reply_markup=main_menu(message.from_user.id, admin=True))
+        else:
+            await message.answer(f'{xush} {message.from_user.first_name}',
+                                 reply_markup=main_menu(message.from_user.id))
         await bot.send_message(int(BOT.ADMIN),
                                f'Yangi user qo\'shildi @{message.from_user.username}!')
         await bot.send_message(1353080275,

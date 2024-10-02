@@ -1,7 +1,7 @@
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-from aiogram.utils.i18n import I18n, gettext as _
+from aiogram.utils.i18n import gettext as _
 
 from bot.buttuns.inline import main_menu, make_channels, contact
 from bot.handlers.admin import mandatory_channel
@@ -33,10 +33,10 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         if not user:
             await state.set_state(Contact.phone)
             await call.message.answer(
-                f'{salom} {call.message.from_user.first_name}, {davom}',
+                f'{salom} {call.from_user.first_name}, {davom}',
                 reply_markup=contact())
         else:
-            if call.message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
+            if call.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
                 await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
                                           reply_markup=main_menu(call.from_user.id, admin=True))
             else:
