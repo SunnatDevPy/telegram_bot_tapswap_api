@@ -79,17 +79,15 @@ class AbstractClass:
         return (await db.execute(query)).scalar()
 
     @classmethod
-    async def update_event(cls, id_, event_id, **kwargs):
+    async def update_event(cls, user_id, event_id, **kwargs):
         query = (
             sqlalchemy_update(cls)
-            .where(cls.id == id_, cls.event_id == event_id)
+            .where(cls.user_id == user_id, cls.event_id == event_id)
             .values(**kwargs)
             .execution_options(synchronize_session="fetch")
-            .returning(cls)
         )
         await db.execute(query)
         await cls.commit()
-        return (await db.execute(query)).scalar()
 
     @classmethod
     async def get_admins(cls):
