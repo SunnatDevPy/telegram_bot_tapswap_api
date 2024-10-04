@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from db import User, Statusie
 from db.models.model import UserAndExperience
-from fast_api.utils import hour_coin_check, get_detail_experience, top_players_from_statu, friends_detail, \
+from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, \
     top_players_from_statu_rank
 
 user_router = APIRouter(prefix='/users', tags=['User'])
@@ -19,10 +19,11 @@ class UserAdd(BaseModel):
     phone: str
     is_admin: Optional[bool] = False
     status_id: int
-    coins: int
-    bonus: int
-    energy: int
-    max_energy: int
+    coins: Optional[int] = 0
+    bonus: Optional[int] = 1
+    energy: Optional[int] = 200
+    max_energy: Optional[int] = 200
+    hour_coin: Optional[int] = 0
 
 
 class UserList(BaseModel):
@@ -36,6 +37,7 @@ class UserList(BaseModel):
     bonus: Optional[int] = None
     energy: Optional[int] = None
     max_energy: Optional[int] = None
+    hour_coin: Optional[int] = None
 
 
 @user_router.post("")
@@ -58,7 +60,7 @@ class UserPatch(BaseModel):
     status_id: Optional[int] = None
     coins: int
     bonus: Optional[int] = None
-    energy: int
+    energy: Optional[int] = 0
     max_energy: Optional[int] = None
 
 
@@ -80,13 +82,35 @@ async def update_status(user):
 async def user_detail(user_id: int):
     user = await User.get(user_id)
     if user:
-        friend = await friends_detail(user_id)
         status = await Statusie.get(user.status_id)
+        return {"user_data": user, "status": status,
+                'hour_coin': user.hour_coin, "rank": await top_players_from_statu_rank(user_id, status)}
+
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.get("/top/")
+async def users_top_rank():
+    return {"top_10": await top_players_from_statu()}
+
+
+@user_router.get("/experience/{user_id}")
+async def user_get_friends(user_id: int):
+    user = await User.get(user_id)
+    if user:
         experience = await UserAndExperience.get_from_user_id_experience(user_id)
-        return {"user_data": user, "status": status, 'experience': await get_detail_experience(experience),
-                'hour_coin': await hour_coin_check(user_id), "top_10": await top_players_from_statu(),
-                "friends": friend[0], "friends_price": friend[-1],
-                "rank": await top_players_from_statu_rank(user_id, status)}
+        return {"user_data": user, 'experience': await get_detail_experience(experience)}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.get("/friends/{user_id}")
+async def user_get_friends(user_id: int):
+    user = await User.get(user_id)
+    if user:
+        friend = await friends_detail(user_id)
+        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1]}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -102,21 +126,42 @@ async def increase_energy(user_id, energy, max_energy):
 
 
 # coin energy update
-@user_router.patch("/{user_id}")
-async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
+@user_router.patch("/detail/{user_id}")
+async def user_patch_update(user_id: int, item: Annotated[UserPatch, Depends()]):
     user = await User.get(user_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
-            await User.update(user_id, **update_data)
+            if update_data['coins'] > 0:
+                await User.update(user_id, **update_data)
+                if user_id in active_tasks:
+                    active_tasks[user_id].cancel()
+                await update_status(user)
+                task = asyncio.create_task(increase_energy(user_id, item.energy, user.max_energy))
+                active_tasks[user_id] = task
+                return {"ok": True, "data": update_data}
+            else:
+                raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@user_router.patch("/{user_id}")
+async def user_coin_energy_update(user_id: int, coin: int, energy: int):
+    user = await User.get(user_id)
+    if user:
+        if coin > 0:
+            await User.update(user_id, coins=coin, energy=energy)
             if user_id in active_tasks:
                 active_tasks[user_id].cancel()
             await update_status(user)
-            task = asyncio.create_task(increase_energy(user_id, item.energy, user.max_energy))
+            task = asyncio.create_task(increase_energy(user_id, energy, user.max_energy))
             active_tasks[user_id] = task
-            return {"ok": True, "data": update_data}
+            return {"ok": True, "user": user}
         else:
-            return {"ok": False, "message": "Nothing to update"}
+            raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -125,3 +170,12 @@ async def user_patch(user_id: int, item: Annotated[UserPatch, Depends()]):
 async def user_delete(user_id: int):
     await User.delete(user_id)
     return {"ok": True, 'id': user_id}
+
+# Instagram,
+# https://www.instagram.com/
+# Telegram,
+# https://web.telegram.org/a/
+# Youtube,
+# https://www.youtube.com/
+# Facebook,
+# https://www.facebook.com/?locale=ru_RU

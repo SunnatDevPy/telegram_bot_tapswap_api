@@ -5,6 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from db import database
+from fast_api.events import event_router
 from fast_api.experiences import experience
 from fast_api.questions import scheduler, questions_router
 from fast_api.referrals import referral_router
@@ -50,6 +51,7 @@ app.include_router(experience)
 app.include_router(status_router)
 app.include_router(referral_router)
 app.include_router(questions_router)
+app.include_router(event_router)
 
 
 @app.websocket("/ws")

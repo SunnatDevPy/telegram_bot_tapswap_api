@@ -8,12 +8,14 @@ from pydantic import BaseModel
 
 from db import User
 from db.models.model import Questions, ParamQuestion
+from fast_api.utils import get_questions_from_user
 
 
 async def update_requests():
     questions = await Questions.get_all()
-    users = await User.get_all()
+    users = await User.get_alls()
     for i in users:
+
         random_questions = random.sample(questions, 20)
         for j in random_questions:
             await ParamQuestion.create(question_id=j.id, answer=False, user_id=i.id)
@@ -31,6 +33,7 @@ class QuestionAdd(BaseModel):
     b: str
     c: str
     d: str
+    ball: int
     answer: str
 
 
@@ -41,6 +44,7 @@ class QuestionList(BaseModel):
     b: str
     c: str
     d: str
+    ball: int
     answer: str
 
 
@@ -50,14 +54,15 @@ async def question_add(question_item: Annotated[QuestionAdd, Depends()]):
     return {'ok': True, "id": question.id}
 
 
-@questions_router.post("/answer/")
+@questions_router.post("/answer/{user_id}")
 async def question_add(user_id: int, question_id: int, answer: str):
-    question = await Questions.get(question_id)
+    question = await ParamQuestion.get_question_from_user(user_id, question_id)
+    quest = await Questions.get(question.id)
     user = await User.get(user_id)
-    if question.answer == answer:
-        await User.update(user_id, ball=user.ball + 1)
+    if quest.answer == answer:
+        await User.update(user_id, coins=user.coins + quest.ball)
         await ParamQuestion.update_question(user_id, question_id, answer=True)
-        return {'user_id': user, "answer": True}
+        return {'user_id': user, "answer": True, 'ball': quest.ball}
     else:
         return {'user_id': user, "answer": False}
 
@@ -68,6 +73,15 @@ async def questions_list() -> list[QuestionList]:
     return users
 
 
+@questions_router.get('/{user_id}')
+async def questions_from_user_list(user_id: int):
+    users = await User.get(user_id)
+    if users:
+        return await get_questions_from_user(user_id)
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
 class QuestionPatch(BaseModel):
     id: Optional[int] = None
     description: Optional[str] = None
@@ -75,6 +89,7 @@ class QuestionPatch(BaseModel):
     b: Optional[str] = None
     c: Optional[str] = None
     d: Optional[str] = None
+    ball: Optional[int] = None
     answer: Optional[str] = None
 
 

@@ -72,12 +72,32 @@ class AbstractClass:
             .where(cls.id == id_, cls.question_id == question_id)
             .values(**kwargs)
             .execution_options(synchronize_session="fetch")
+            .returning(cls)
         )
         await db.execute(query)
         await cls.commit()
+        return (await db.execute(query)).scalar()
+
+    @classmethod
+    async def update_event(cls, id_, event_id, **kwargs):
+        query = (
+            sqlalchemy_update(cls)
+            .where(cls.id == id_, cls.event_id == event_id)
+            .values(**kwargs)
+            .execution_options(synchronize_session="fetch")
+            .returning(cls)
+        )
+        await db.execute(query)
+        await cls.commit()
+        return (await db.execute(query)).scalar()
 
     @classmethod
     async def get_admins(cls):
+        query = select(cls).where(cls.is_admin == True)
+        return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def get_experience_from_user(cls):
         query = select(cls).where(cls.is_admin == True)
         return (await db.execute(query)).scalars()
 
@@ -93,8 +113,8 @@ class AbstractClass:
 
     @classmethod
     async def get_from_type(cls, type):
-        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins)).limit(11)
-        return (await db.execute(query)).scalars()
+        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins)).limit(10)
+        return (await db.execute(query)).scalars().all()
 
     @classmethod
     async def get_from_type_rank(cls, type_):
@@ -104,7 +124,7 @@ class AbstractClass:
     @classmethod
     async def get_from_user_id(cls, id_):
         query = select(cls).where(cls.user_id == id_)
-        return (await db.execute(query)).scalars()
+        return (await db.execute(query)).scalars().all()
 
     @classmethod
     async def get_from_referral_id(cls, id_):
@@ -117,7 +137,17 @@ class AbstractClass:
         return (await db.execute(query)).scalars()
 
     @classmethod
-    async def get_experience_from_user(cls, user_id, id_):
+    async def get_experience_from_users(cls, user_id, id_):
+        query = select(cls).order_by(cls.experience_id).where(cls.user_id == user_id, cls.id == id_)
+        return (await db.execute(query)).scalar()
+
+    @classmethod
+    async def get_question_from_user(cls, user_id, question_id):
+        query = select(cls).order_by(cls.question_id).where(cls.user_id == user_id, cls.question_id == question_id)
+        return (await db.execute(query)).scalar()
+
+    @classmethod
+    async def get_event_from_users(cls, user_id, id_):
         query = select(cls).order_by(cls.experience_id).where(cls.user_id == user_id, cls.id == id_)
         return (await db.execute(query)).scalar()
 
@@ -129,7 +159,12 @@ class AbstractClass:
 
     @classmethod
     async def get_all(cls):
-        return (await db.execute(select(cls).order_by(cls.id))).scalars().all()
+        return (await db.execute(select(cls))).scalars().all()
+
+    @classmethod
+    async def get_alls(cls):
+        query = select(cls).order_by(cls.id)
+        return (await db.execute(query)).scalars()
 
 
 class CreateModel(Base, AbstractClass):

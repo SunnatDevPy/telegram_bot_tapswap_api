@@ -44,11 +44,8 @@ def play_game(back):
 def main_menu(user_id, admin=False, language='uz'):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🏆Europa Chempionlar🏆", callback_data='game_world'),
-              InlineKeyboardButton(text="📞Biz bilan bog'lanish📞", callback_data='game_call'),
-              InlineKeyboardButton(text="📍Bizning ijtimoiy tarmoqlar📍", callback_data='game_social'),
               InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
-              InlineKeyboardButton(text="🏳Til o'zgartirish🏳", callback_data='game_language'),
-              InlineKeyboardButton(text="Web App",
+              InlineKeyboardButton(text="🔴Live🔴",
                                    web_app=WebAppInfo(
                                        url=f'https://stock-football-mini-app.vercel.app/#/{user_id}/{language}/'))])
     if admin:

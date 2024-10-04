@@ -8,7 +8,7 @@ from bot.handlers.admin import mandatory_channel
 from bot.state.states import Contact
 from config import BOT
 from db import User, Statusie, Experience
-from db.models.model import UserAndExperience, Referral
+from db.models.model import UserAndExperience, Referral, Event, UserAndEvent
 from aiogram.utils.i18n import gettext as _
 
 start_router = Router()
@@ -57,6 +57,8 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
         await message.answer(
             "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin",
             reply_markup=ReplyKeyboardRemove())
+        for i in await Event.get_all():
+            await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
         if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
             await message.answer(f'Xush kelibsiz Admin {message.from_user.first_name}',
                                  reply_markup=main_menu(message.from_user.id, admin=True))

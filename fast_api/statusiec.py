@@ -14,6 +14,13 @@ class StatusAdd(BaseModel):
     level: int
 
 
+class StatusList(BaseModel):
+    id: int
+    name: str
+    limit_coin: int
+    level: int
+
+
 @status_router.post("")
 async def status_add(status: Annotated[StatusAdd, Depends()]):
     status = await Statusie.create(**status.dict())
@@ -21,8 +28,8 @@ async def status_add(status: Annotated[StatusAdd, Depends()]):
 
 
 @status_router.get('')
-async def status_list() -> list[StatusAdd]:
-    status = await Statusie.get_all()
+async def status_list() -> list[StatusList]:
+    status = await Statusie.get_alls()
     return status
 
 
