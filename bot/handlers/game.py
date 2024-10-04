@@ -13,7 +13,7 @@ from bot.handlers.admin import mandatory_channel
 from bot.handlers.league import uzbekistan_league, england_league, france_league, germany_league, italy_league, \
     portugal_league, spain_league
 from bot.handlers.resp import live_game, get_response
-from db import Phone, About, Network, User
+from db import User
 
 game_router = Router()
 
@@ -57,26 +57,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot):
             await call.message.edit_text(_("<b>Jahon o'yinlari</b>"), parse_mode='HTML', reply_markup=world_game())
         if data[-1] == 'country':
             await call.message.edit_text(_("<b>Davlatni tanlang</b>"), parse_mode='HTML', reply_markup=country_btn())
-        if data[-1] == 'call':
-            res = await Phone.get(1)
-            if res:
-                await call.message.answer(res.name, parse_mode='HTML')
-            else:
-                await call.message.answer(_("Ma'lumot yo'q"), parse_mode='HTML')
-        if data[-1] == 'social':
-            photo = 'https://telegra.ph/file/c9258b9460e1f3dccb5bc.png'
-            networks = await Network.get_all()
-            if networks:
-                await call.message.answer_photo(photo, caption=_('Bizning ijtimoiy tarmoqlar'), parse_mode='HTML',
-                                                reply_markup=await network(networks))
-            else:
-                await call.message.answer(_("Ma'lumot yo'q!"), parse_mode='HTML')
-        if data[-1] == 'info':
-            res = await About.get(1)
-            if res:
-                await call.message.answer(res.name, parse_mode='HTML')
-            else:
-                await call.message.answer(_("Ma'lumot yo'q!"), parse_mode='HTML')
+
         if data[-1] == 'settings':
             await call.message.edit_text("<b>⚙️Settings⚙️</b>", parse_mode='HTML', reply_markup=settings())
         if data[-1] == 'languge':
