@@ -43,14 +43,14 @@ def play_game(back):
 
 def main_menu(user_id, admin=False, language='uz'):
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="🏆Europa Chempionlar🏆", callback_data='game_world'),
+    ikb.add(*[InlineKeyboardButton(text="🏆Europa Chempionatlar🏆", callback_data='game_world'),
               InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
               InlineKeyboardButton(text="🔴Live🔴",
                                    web_app=WebAppInfo(
                                        url=f'https://stock-football-mini-app.vercel.app/#/{user_id}/{language}/'))])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
-    ikb.adjust(1, 2, 1, repeat=True)
+    ikb.adjust(1, repeat=True)
     return ikb.as_markup()
 
 
@@ -97,11 +97,11 @@ def confirm_text():
 
 def world_game():
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="🏆UEFA Chempionlar Ligasi",
+    ikb.add(*[InlineKeyboardButton(text="🏆Uefa Chempion ligasi",
                                    callback_data="cup_2_UEFA Chempionlar Ligasi"),
-              InlineKeyboardButton(text="🏆UEFA Europa Ligasi",
+              InlineKeyboardButton(text="🏆Uefa Europa ligasi",
                                    callback_data="cup_3_UEFA Europa Ligasi"),
-              InlineKeyboardButton(text="🏆Konferensiy Ligasi",
+              InlineKeyboardButton(text="🏆Konferensiy ligasi",
                                    callback_data='cup_21_Confederations Ligasi'),
               InlineKeyboardButton(text="⬅️Ortga",
                                    callback_data='back_home')])
