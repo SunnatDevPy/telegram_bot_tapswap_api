@@ -6,7 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
 from db import User, Channel
 
-FASTAPI_URL = "http://127.0.0.1:8000/token"
+FASTAPI_URL = "https://yengi.mussi.uz/token"
 
 
 def link(url):
