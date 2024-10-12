@@ -9,6 +9,28 @@ from db import User, Channel
 FASTAPI_URL = "https://yengi.mussi.uz/token"
 
 
+def main_menu(user_id, admin=False, language='uz'):
+    response = requests.post(FASTAPI_URL, params={"user_id": user_id})
+    print(response)
+    if response.status_code == 200:
+        token_data = response.json()
+        access_token = token_data['access_token']
+    else:
+        access_token = "Hatolik"
+    print(access_token)
+    ikb = InlineKeyboardBuilder()
+    ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
+                                   web_app=WebAppInfo(
+                                       url=f'https://stock-football-mini-app.vercel.app/#/{access_token}/{language}/')),
+              InlineKeyboardButton(text="🏆Yevropa Chempionatlar🏆", callback_data='game_world'),
+              InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
+              ])
+    if admin:
+        ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
+    ikb.adjust(1, 2)
+    return ikb.as_markup()
+
+
 def link(url):
     ikb = InlineKeyboardBuilder()
     ikb.row(InlineKeyboardButton(text='Link', url=url))
@@ -42,28 +64,6 @@ def play_game(back):
               InlineKeyboardButton(text="🔵Natijalar🔵", callback_data='old_game'),
               InlineKeyboardButton(text="⬅️Ortga", callback_data=f'back_{back}')])
     ikb.adjust(2, repeat=True)
-    return ikb.as_markup()
-
-
-def main_menu(user_id, admin=False, language='uz'):
-    response = requests.post(FASTAPI_URL, json={"user_id": user_id})
-
-    if response.status_code == 200:
-        token_data = response.json()
-        access_token = token_data['access_token']
-    else:
-        access_token = "Hatolik"
-    print(access_token)
-    ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
-                                   web_app=WebAppInfo(
-                                       url=f'https://stock-football-mini-app.vercel.app/#/{access_token}/{language}/')),
-              InlineKeyboardButton(text="🏆Yevropa Chempionatlar🏆", callback_data='game_world'),
-              InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
-              ])
-    if admin:
-        ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
-    ikb.adjust(1, 2)
     return ikb.as_markup()
 
 
