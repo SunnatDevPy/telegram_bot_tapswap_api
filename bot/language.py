@@ -1,6 +1,7 @@
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, ReplyKeyboardRemove
+from aiogram.utils import i18n
 from aiogram.utils.i18n import gettext as _
 
 from bot.buttuns.inline import main_menu, make_channels, contact
@@ -20,10 +21,10 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     channels = await mandatory_channel(call.from_user.id, bot)
     if channels:
         try:
-            await call.message.edit_text(_('Barchasiga obuna boling'),
+            await call.message.edit_text(_('Barchasiga obuna boling', locale=lang_code),
                                          reply_markup=await make_channels(channels, bot))
         except:
-            await call.message.answer(_('Barchasiga obuna boling'),
+            await call.message.answer(_('Barchasiga obuna boling', locale=lang_code),
                                       reply_markup=await make_channels(channels, bot))
     else:
         user = await User.get(call.from_user.id)

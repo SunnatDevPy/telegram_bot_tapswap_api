@@ -41,41 +41,45 @@ def web_app(leagues, id):
 
 
 @game_router.callback_query(F.data.startswith('game_'))
-async def leagues_handler(call: CallbackQuery, bot: Bot):
+async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+    data = await state.get_data()
+    lang_loc = data.get('locale')
     channels = await mandatory_channel(call.from_user.id, bot)
     if channels:
         try:
-            await call.message.edit_text(_('Barchasiga obuna boling'),
+            await call.message.edit_text(_('Barchasiga obuna boling', locale=lang_loc),
                                          reply_markup=await make_channels(channels, bot))
         except:
-            await call.message.answer(_('Barchasiga obuna boling'),
+            await call.message.answer(_('Barchasiga obuna boling', locale=lang_loc),
                                       reply_markup=await make_channels(channels, bot))
     else:
         data = call.data.split('_')
         await call.answer()
         if data[-1] == 'world':
-            await call.message.edit_text(_("<b>Jahon o'yinlari</b>"), parse_mode='HTML', reply_markup=world_game())
+            await call.message.edit_text(_("<b>Jahon o'yinlari</b>", locale=lang_loc), parse_mode='HTML',
+                                         reply_markup=world_game())
         if data[-1] == 'country':
-            await call.message.edit_text(_("<b>Davlatni tanlang</b>"), parse_mode='HTML', reply_markup=country_btn())
+            await call.message.edit_text(_("<b>Davlatni tanlang</b>", locale=lang_loc), parse_mode='HTML',
+                                         reply_markup=country_btn())
 
         if data[-1] == 'settings':
             await call.message.edit_text("<b>⚙️Settings⚙️</b>", parse_mode='HTML', reply_markup=settings())
-        if data[-1] == 'languge':
-            await call.message.edit_text(_("<b>️Til tanlang!</b>"), parse_mode='HTML', reply_markup=settings())
 
 
 @game_router.callback_query(F.data == 'live')
 async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    data = await state.get_data()
+    lang_loc = data.get('locale')
     channels = await mandatory_channel(call.from_user.id, bot)
     if channels:
         try:
-            await call.message.edit_text(_('Barchasiga obuna boling'),
+            await call.message.edit_text(_('Barchasiga obuna boling', locale=lang_loc),
                                          reply_markup=await make_channels(channels, bot))
         except:
-            await call.message.answer(_('Barchasiga obuna boling'),
+            await call.message.answer(_('Barchasiga obuna boling', locale=lang_loc),
                                       reply_markup=await make_channels(channels, bot))
     else:
-        data = await state.get_data()
+
         await call.answer()
         ikb = InlineKeyboardBuilder()
         league = live_game(get_response("fixtures", {"live": "all"}), int(data['id']))
@@ -84,24 +88,26 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
             live = _("live o'yinlari")
             await call.message.answer(f"{data['league']} {live}")
             for i, val in enumerate(league[0]):
-                ikb.row(InlineKeyboardButton(text=_("Batafsil"), callback_data=f"abouts_{i + 1}"))
+                ikb.row(InlineKeyboardButton(text=_("Batafsil", locale=lang_loc), callback_data=f"abouts_{i + 1}"))
                 await call.message.answer(val, parse_mode='HTML', reply_markup=ikb.as_markup())
         else:
-            await call.message.answer(html_decoration.bold(_(f"Boshlangan o'yin yo'q")), parse_mode='HTML')
+            await call.message.answer(html_decoration.bold(_(f"Boshlangan o'yin yo'q", locale=lang_loc)),
+                                      parse_mode='HTML')
 
 
 @game_router.callback_query(F.data == 'old_game')
 async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    data = await state.get_data()
+    lang_loc = data.get('locale')
     channels = await mandatory_channel(call.from_user.id, bot)
     if channels:
         try:
-            await call.message.edit_text(_('Barchasiga obuna boling'),
+            await call.message.edit_text(_('Barchasiga obuna boling', locale=lang_loc),
                                          reply_markup=await make_channels(channels, bot))
         except:
-            await call.message.answer(_('Barchasiga obuna boling'),
+            await call.message.answer(_('Barchasiga obuna boling', locale=lang_loc),
                                       reply_markup=await make_channels(channels, bot))
     else:
-        data = await state.get_data()
         await call.answer()
         league = live_game(
             get_response("fixtures", {"league": data['id'], "season": datetime.now().year,
@@ -113,10 +119,10 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
             await call.message.answer(f"{data['league']} {lang}")
             for i, val in enumerate(league[0]):
                 ikb = InlineKeyboardBuilder()
-                ikb.add(*[InlineKeyboardButton(text=_("Batafsil"), callback_data=f"abouts_{i + 1}")])
+                ikb.add(*[InlineKeyboardButton(text=_("Batafsil", locale=lang_loc), callback_data=f"abouts_{i + 1}")])
                 await call.message.answer(val, parse_mode='HTML', reply_markup=ikb.as_markup())
         else:
-            await call.message.answer(html_decoration.bold(f"Natija yo'q"), parse_mode='HTML')
+            await call.message.answer(html_decoration.bold(_(f"Natija yo'q", locale=lang_loc)), parse_mode='HTML')
 
 
 @game_router.callback_query(F.data.startswith('abouts_'))

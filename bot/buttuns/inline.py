@@ -1,8 +1,12 @@
+import bcrypt
+import requests
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
 
 from db import User, Channel
+
+FASTAPI_URL = "http://127.0.0.1:8000/jwt/token"
 
 
 def link(url):
@@ -42,15 +46,27 @@ def play_game(back):
 
 
 def main_menu(user_id, admin=False, language='uz'):
+    response = requests.post(FASTAPI_URL, json={"user_id": user_id})
+
+    if response.status_code == 200:
+        token_data = response.json()
+        access_token = token_data['access_token']
+        refresh_token = token_data['refresh_token']
+    else:
+        access_token = "Hatolik"
+        refresh_token = "Hatolik"
+    print(language)
+    print(access_token, refresh_token)
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="🏆Europa Chempionatlar🏆", callback_data='game_world'),
-              InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
-              InlineKeyboardButton(text="🔴Live🔴",
+    ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
                                    web_app=WebAppInfo(
-                                       url=f'https://stock-football-mini-app.vercel.app/#/{user_id}/{language}/'))])
+                                       url=f'https://stock-football-mini-app.vercel.app/#/{access_token}/{language}/')),
+              InlineKeyboardButton(text="🏆Yevropa Chempionatlar🏆", callback_data='game_world'),
+              InlineKeyboardButton(text="⚽Milliy Chempionatlar⚽", callback_data='game_country'),
+              ])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
-    ikb.adjust(1, repeat=True)
+    ikb.adjust(1, 2)
     return ikb.as_markup()
 
 
@@ -97,15 +113,15 @@ def confirm_text():
 
 def world_game():
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="🏆Uefa Chempion ligasi",
-                                   callback_data="cup_2_UEFA Chempionlar Ligasi"),
-              InlineKeyboardButton(text="🏆Uefa Europa ligasi",
-                                   callback_data="cup_3_UEFA Europa Ligasi"),
+    ikb.add(*[InlineKeyboardButton(text="🏆UEFA Chempion ligasi",
+                                   callback_data="cup_2_UEFA Chempion ligasi"),
+              InlineKeyboardButton(text="🏆UEFA Yevropa ligasi",
+                                   callback_data="cup_3_UEFA Yevropa ligasi"),
               InlineKeyboardButton(text="🏆Konferensiy ligasi",
-                                   callback_data='cup_21_Confederations Ligasi'),
+                                   callback_data='cup_21_Konferensiy ligasi'),
               InlineKeyboardButton(text="⬅️Ortga",
                                    callback_data='back_home')])
-    ikb.adjust(2, repeat=True)
+    ikb.adjust(2, 1, 1)
     return ikb.as_markup()
 
 

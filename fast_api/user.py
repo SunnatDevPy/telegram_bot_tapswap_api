@@ -1,11 +1,14 @@
 import asyncio
+from datetime import datetime
 from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from starlette.responses import JSONResponse
 
 from db import User, Statusie
 from db.models.model import UserAndExperience
+from fast_api.jwt_ import get_current_user
 from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, \
     top_players_from_statu_rank
 
@@ -47,7 +50,7 @@ async def user_add(user: Annotated[UserAdd, Depends()]):
 
 
 @user_router.get('')
-async def user_list() -> list[UserList]:
+async def user_list(user_token=Depends(get_current_user)) -> list[UserList]:
     users = await User.get_all()
     return users
 
@@ -78,16 +81,71 @@ async def update_status(user):
         return
 
 
-@user_router.get("/{user_id}")
-async def user_detail(user_id: int):
-    user = await User.get(user_id)
-    if user:
-        status = await Statusie.get(user.status_id)
-        return {"user_data": user, "status": status,
-                'hour_coin': user.hour_coin, "rank": await top_players_from_statu_rank(user_id, status)}
+class UserData(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: Optional[str] = None
+    is_admin: Optional[bool] = None
+    hour_coin: Optional[int] = None
+    updated_at: Optional[str] = None
+    id: Optional[int] = None
+    username: Optional[str] = None
+    coins: Optional[int] = None
+    status_id: Optional[int] = None
+    bonus: Optional[int] = None
+    energy: Optional[int] = None
+    max_energy: Optional[int] = None
+    created_at: Optional[str] = None
 
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+
+class Status(BaseModel):
+    name: str
+    id: int
+    created_at: str
+    limit_coin: int
+    level: int
+    updated_at: str
+
+
+class UserId(BaseModel):
+    id: int
+
+
+class Rank(BaseModel):
+    status: str
+    rank: int
+
+
+class ResponseModel(BaseModel):
+    user_data: UserData
+    status: Status
+    hour_coin: int
+    rank: Rank
+
+
+@user_router.get("/")
+async def user_detail(user: Annotated[UserData, Depends(get_current_user)]):
+    status = await Statusie.get(user.status_id)
+    response_data = ResponseModel(
+    user_data=UserData(first_name=user.first_name, last_name=user.last_name, phone=user.phone,
+                           is_admin=user.is_admin,
+                           hour_coin=user.hour_coin,
+                           updated_at=str(user.updated_at),
+                           id=user.id,
+                           username=user.username,
+                           coins=user.coins,
+                           status_id=user.status_id,
+                           bonus=user.bonus,
+                           energy=user.energy,
+                           max_energy=user.max_energy,
+                           created_at=str(user.created_at)),
+        status=Status(id=status.id, name=status.name, limit_coin=status.limit_coin, level=status.level,
+                      created_at=str(status.created_at), updated_at=str(status.updated_at)),
+        hour_coin=user.hour_coin,
+        rank=await top_players_from_statu_rank(user.id, status)
+    )
+    return JSONResponse(content=response_data.dict())
+    # return {"status": status, "user": user, "rank": await top_players_from_statu_rank(user.id, status)}
 
 
 @user_router.get("/top/")
@@ -95,24 +153,16 @@ async def users_top_rank():
     return {"top_10": await top_players_from_statu()}
 
 
-@user_router.get("/experience/{user_id}")
-async def user_get_friends(user_id: int):
-    user = await User.get(user_id)
-    if user:
-        experience = await UserAndExperience.get_from_user_id_experience(user_id)
-        return {"user_data": user, 'experience': await get_detail_experience(experience)}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+@user_router.get("/experience/")
+async def user_get_friends(user=Depends(get_current_user)):
+    experience = await UserAndExperience.get_from_user_id_experience(user.id)
+    return {"user_data": user, 'experience': await get_detail_experience(experience)}
 
 
-@user_router.get("/friends/{user_id}")
-async def user_get_friends(user_id: int):
-    user = await User.get(user_id)
-    if user:
-        friend = await friends_detail(user_id)
-        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1]}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+@user_router.get("/friends/")
+async def user_get_friends(user=Depends(get_current_user)):
+    friend = await friends_detail(user.id)
+    return {"user_data": user, "friends": friend[0], "friends_price": friend[-1]}
 
 
 async def increase_energy(user_id, energy, max_energy):
@@ -126,50 +176,42 @@ async def increase_energy(user_id, energy, max_energy):
 
 
 # coin energy update
-@user_router.patch("/detail/{user_id}")
-async def user_patch_update(user_id: int, item: Annotated[UserPatch, Depends()]):
-    user = await User.get(user_id)
-    if user:
-        update_data = {k: v for k, v in item.dict().items() if v is not None}
-        if update_data:
-            if update_data['coins'] > 0:
-                await User.update(user_id, **update_data)
-                if user_id in active_tasks:
-                    active_tasks[user_id].cancel()
-                await update_status(user)
-                task = asyncio.create_task(increase_energy(user_id, item.energy, user.max_energy))
-                active_tasks[user_id] = task
-                return {"ok": True, "data": update_data}
-            else:
-                raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
-        else:
-            return {"ok": False, "message": "Nothing to update"}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-
-@user_router.patch("/{user_id}")
-async def user_coin_energy_update(user_id: int, coin: int, energy: int):
-    user = await User.get(user_id)
-    if user:
-        if coin > 0:
-            await User.update(user_id, coins=coin, energy=energy)
-            if user_id in active_tasks:
-                active_tasks[user_id].cancel()
+@user_router.patch("/detail/")
+async def user_patch_update(item: Annotated[UserPatch, Depends()], user=Depends(get_current_user)):
+    update_data = {k: v for k, v in item.dict().items() if v is not None}
+    if update_data:
+        if update_data['coins'] > 0:
+            await User.update(user.id, **update_data)
+            if user.id in active_tasks:
+                active_tasks[user.id].cancel()
             await update_status(user)
-            task = asyncio.create_task(increase_energy(user_id, energy, user.max_energy))
-            active_tasks[user_id] = task
-            return {"ok": True, "user": user}
+            task = asyncio.create_task(increase_energy(user.id, item.energy, user.max_energy))
+            active_tasks[user.id] = task
+            return {"ok": True, "data": update_data}
         else:
             raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
     else:
-        raise HTTPException(status_code=404, detail="Item not found")
+        return {"ok": False, "message": "Nothing to update"}
 
 
-@user_router.delete("/{user_id}")
-async def user_delete(user_id: int):
-    await User.delete(user_id)
-    return {"ok": True, 'id': user_id}
+@user_router.patch("/")
+async def user_coin_energy_update(coin: int, energy: int, user=Depends(get_current_user)):
+    if coin > 0:
+        await User.update(user.id, coins=coin, energy=energy)
+        if user.id in active_tasks:
+            active_tasks[user.id].cancel()
+        await update_status(user)
+        task = asyncio.create_task(increase_energy(user.id, energy, user.max_energy))
+        active_tasks[user.id] = task
+        return {"ok": True, "user": user}
+    else:
+        raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
+
+
+@user_router.delete("/")
+async def user_delete(user=Depends(get_current_user)):
+    await User.delete(user.id)
+    return {"ok": True, 'id': user.id}
 
 # Instagram,
 # https://www.instagram.com/
