@@ -51,12 +51,9 @@ def main_menu(user_id, admin=False, language='uz'):
     if response.status_code == 200:
         token_data = response.json()
         access_token = token_data['access_token']
-        refresh_token = token_data['refresh_token']
     else:
         access_token = "Hatolik"
-        refresh_token = "Hatolik"
-    print(language)
-    print(access_token, refresh_token)
+    print(access_token)
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
                                    web_app=WebAppInfo(
