@@ -20,7 +20,7 @@ async def on_start(bot: Bot):
     commands_admin = [
         BotCommand(command='start', description="Bo'tni ishga tushirish")
     ]
-    text = "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin"
+    text = "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovg'alarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin"
     await bot.set_my_description(text)
     await bot.set_my_commands(commands=commands_admin)
 
