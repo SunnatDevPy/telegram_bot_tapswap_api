@@ -9,7 +9,7 @@ from db import User, Channel
 FASTAPI_URL = "https://yengi.mussi.uz/token"
 
 
-def main_menu(user_id, language, admin=False):
+def main_menu(user_id, language='uz', admin=False):
     print(language)
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
