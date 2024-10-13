@@ -45,4 +45,4 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
                     "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin",
                     reply_markup=ReplyKeyboardRemove())
                 await call.message.answer(f'{xush} {call.from_user.first_name}',
-                                          reply_markup=main_menu(call.from_user.id))
+                                          reply_markup=main_menu(call.from_user.id, lang_code))

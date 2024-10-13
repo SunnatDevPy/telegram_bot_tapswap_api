@@ -150,6 +150,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext):
 
 @game_router.callback_query(F.data == 'confirm_channel')
 async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
+    data = await state.get_data()
     channels = await mandatory_channel(call.from_user.id, bot)
     if channels:
         try:
@@ -159,7 +160,7 @@ async def leagues_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
             await call.message.answer(_('Barchasiga obuna boling'),
                                       reply_markup=await make_channels(channels, bot))
     else:
-        await call.message.answer(_('Bosh menu'), reply_markup=main_menu(call.from_user.id))
+        await call.message.answer(_('Bosh menu'), reply_markup=main_menu(call.from_user.id, data.get('locale')))
 
 
 @game_router.callback_query(F.data.startswith('cup_'))
@@ -252,16 +253,17 @@ async def league_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
 
 
 @game_router.callback_query(F.data.startswith('back_'))
-async def leagues_handler(call: CallbackQuery, bot: Bot):
+async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
+    dates = await state.get_data()
     data = call.data.split('_')
     if data[-1] == 'home':
         await call.message.delete()
         if call.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
             await call.message.answer(f'Admin {call.from_user.first_name}',
-                                      reply_markup=main_menu(call.from_user.id, admin=True))
+                                      reply_markup=main_menu(call.from_user.id, dates.get('locale'), admin=True))
         else:
             await call.message.answer(_("<b>Bosh menu</b>"), parse_mode='HTML',
-                                      reply_markup=main_menu(call.from_user.id))
+                                      reply_markup=main_menu(call.from_user.id, dates.get('locale')))
     if data[-1] == 'settings':
         await call.message.edit_text("<b>⚙️Settings⚙️</b>", parse_mode='HTML', reply_markup=settings())
     if data[-1] == 'country':

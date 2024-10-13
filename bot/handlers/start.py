@@ -1,7 +1,7 @@
 from aiogram import Router, Bot, html
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, ReplyKeyboardRemove
+from aiogram.types import Message
 from aiogram.utils.i18n import gettext as _
 
 from bot.buttuns.inline import main_menu, contact, language_inl
