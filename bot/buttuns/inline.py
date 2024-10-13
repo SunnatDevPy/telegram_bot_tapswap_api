@@ -10,14 +10,6 @@ FASTAPI_URL = "https://yengi.mussi.uz/token"
 
 
 def main_menu(user_id, admin=False, language='uz'):
-    response = requests.post(FASTAPI_URL, params={"user_id": user_id})
-    print(response)
-    if response.status_code == 200:
-        token_data = response.json()
-        access_token = token_data['access_token']
-    else:
-        access_token = "Hatolik"
-    print(access_token)
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
                                    web_app=WebAppInfo(
