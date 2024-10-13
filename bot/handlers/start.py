@@ -15,9 +15,6 @@ start_router = Router()
 
 @start_router.message(CommandStart())
 async def command_start(message: Message, bot: Bot, state: FSMContext):
-    await message.answer(
-        _("Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin"),
-        reply_markup=ReplyKeyboardRemove())
     await message.answer(_('Til tanlang'), reply_markup=language_inl())
     if ' ' in message.text:
         args = message.text.split(' ')[1]
@@ -57,10 +54,6 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
         for i in experience:
             await UserAndExperience.create(user_id=user.id, degree=i.degree, hour_coin=i.hour_coin, price=i.price,
                                            experience_id=i.id)
-        await message.answer(
-            _("Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin",
-              locale=lang_loc),
-            reply_markup=ReplyKeyboardRemove())
         for i in await Event.get_all():
             await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
         if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
