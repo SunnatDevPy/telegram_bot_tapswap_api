@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, debug=False, docs_url='/docs', redoc_url=None)
+app = FastAPI(lifespan=lifespan, debug=False, docs_url='/hellos', redoc_url=None)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -41,10 +41,9 @@ security = HTTPBasic()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:8489", "https://stock-football-mini-app.vercel.app/"],
-    # Список допустимых источников
-    allow_credentials=True,  # Разрешить отправку кук (если нужно)
-    allow_methods=["*"],  # Разрешить все методы (GET, POST, и т.д.)
-    allow_headers=["*"],  # Разрешить все заголовки
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(user_router)
@@ -54,27 +53,3 @@ app.include_router(referral_router)
 app.include_router(questions_router)
 app.include_router(event_router)
 app.include_router(jwt_router)
-
-# admin = Admin(
-#     engine=database._engine,
-#     title="Coin",
-#     base_url='/admin',
-#     auth_provider=UsernameAndPasswordProvider()
-# )
-#
-#
-# class UserModelView(ModelView):
-#     exclude_fields_from_edit = ('created_at', 'updated_at')
-#
-#
-# admin.add_view(UserModelView(User))
-# admin.add_view(ModelView(Event))
-# admin.add_view(ModelView(UserAndEvent))
-# admin.add_view(ModelView(Referral))
-# admin.add_view(ModelView(Experience))
-# admin.add_view(ModelView(UserAndExperience))
-# admin.add_view(ModelView(Statusie))
-# admin.add_view(ModelView(Questions))
-# admin.add_view(ModelView(ParamQuestion))
-#
-# admin.mount_to(app)

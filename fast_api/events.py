@@ -13,12 +13,14 @@ event_router = APIRouter(prefix='/events', tags=['Events'])
 class EventAdd(BaseModel):
     name: str
     url: str
+    timer: int
     coin: int
 
 
 class EventList(BaseModel):
     id: int
     name: str
+    timer: int
     url: str
     coin: int
 

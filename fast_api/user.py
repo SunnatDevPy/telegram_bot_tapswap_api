@@ -3,7 +3,6 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
-from starlette.responses import JSONResponse
 
 from db import User, Statusie
 from db.models.model import UserAndExperience
