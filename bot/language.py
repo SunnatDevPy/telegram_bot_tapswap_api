@@ -39,7 +39,7 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
         else:
             if call.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
                 await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
-                                          reply_markup=main_menu(call.from_user.id, admin=True))
+                                          reply_markup=main_menu(call.from_user.id, lang_code, admin=True))
             else:
                 await call.message.answer(
                     "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin",

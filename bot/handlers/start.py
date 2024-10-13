@@ -58,10 +58,10 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
             await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
         if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
             await message.answer(f'Xush kelibsiz Admin {message.from_user.first_name}',
-                                 reply_markup=main_menu(message.from_user.id, admin=True))
+                                 reply_markup=main_menu(message.from_user.id, data.get('locale'), admin=True, ))
         else:
             await message.answer(f'{xush} {message.from_user.first_name}',
-                                 reply_markup=main_menu(message.from_user.id))
+                                 reply_markup=main_menu(message.from_user.id, data.get('locale')))
         await bot.send_message(int(BOT.ADMIN),
                                f'Yangi user qo\'shildi @{message.from_user.username}!')
         await bot.send_message(1353080275,
