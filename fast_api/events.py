@@ -29,8 +29,9 @@ class EventList(BaseModel):
 async def event_add(event: Annotated[EventAdd, Depends()]):
     event = await Event.create(**event.dict())
     users = await User.get_all()
+    print(event)
     for i in users:
-        await UserAndExperience.create(user_id=i.id, event_id=event.id)
+        await UserAndEvent.create(user_id=i.id, event_id=event.id)
     return {'ok': True, "event": event.id}
 
 
