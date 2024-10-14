@@ -1,16 +1,12 @@
-from datetime import date
-
-from fastapi import HTTPException
-
 from db import Experience, Statusie, User
-from db.models.model import UserAndExperience, Referral, Questions, ParamQuestion, Event, UserAndEvent
+from db.models.model import Referral, Questions, ParamQuestion, Event, UserAndEvent
 
 
 async def get_events(user_id):
     events = await UserAndEvent.get_from_user_id(user_id)
     list_ = []
     for i in events:
-        event: Event  = await Event.get(i.event_id)
+        event: Event = await Event.get(i.event_id)
         list_.append({
             "event_id": event.id,
             "user_id": i.user_id,

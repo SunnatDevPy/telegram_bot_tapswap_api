@@ -22,8 +22,8 @@ class ExperienceAdd(BaseModel):
 
 
 async def save_numbers_every_hour(user):
-    await asyncio.sleep(15)
-    hour_coin = user.hour_coin * 8
+    await asyncio.sleep(10800)
+    hour_coin = user.hour_coin * 3
     await User.update(user.id, coins=user.coins + hour_coin)
     if user.id in active_tasks:
         del active_tasks[user.id]
@@ -42,8 +42,8 @@ async def experience_activate_degree(user_id: int, activate: bool):
         task = asyncio.create_task(save_numbers_every_hour(users))
         active_tasks[user_id] = task
         return {'ok': True, "start_time": datetime.datetime.now(),
-                "end_time": datetime.datetime.now() + timedelta(seconds=15),
-                "hour_coin_8": users.hour_coin * 8}
+                "end_time": datetime.datetime.now() + timedelta(seconds=10800),
+                "hour_coin_8": users.hour_coin * 3}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 

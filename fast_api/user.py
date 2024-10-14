@@ -168,12 +168,3 @@ async def user_coin_energy_update(coin: int, energy: int, user_id: int):
 async def user_delete(user=Depends(get_current_user)):
     await User.delete(user.id)
     return {"ok": True, 'id': user.id}
-
-# Instagram,
-# https://www.instagram.com/
-# Telegram,
-# https://web.telegram.org/a/
-# Youtube,
-# https://www.youtube.com/
-# Facebook,
-# https://www.facebook.com/?locale=ru_RU

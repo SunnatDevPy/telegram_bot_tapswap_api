@@ -41,7 +41,7 @@ active_tasks = {}
 
 async def claim_friends(user):
     coin = await friends_coin(user.id)
-    await asyncio.sleep(15)
+    await asyncio.sleep(28800)
     hour_coin = coin * 8
     await User.update(user.id, coins=user.coins + hour_coin)
     if user.id in active_tasks:
@@ -58,7 +58,7 @@ async def activate_user(user_id: int):
         task = asyncio.create_task(claim_friends(user))
         active_tasks[user_id] = task
         return {'ok': True, "start_time": datetime.datetime.now(),
-                "end_time": datetime.datetime.now() + timedelta(seconds=15),
+                "end_time": datetime.datetime.now() + timedelta(seconds=28800),
                 "hour_coin_8": user.hour_coin * 8}
     else:
         raise HTTPException(status_code=404, detail="Item not found")

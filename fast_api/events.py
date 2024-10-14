@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from db import User
-from db.models.model import UserAndExperience, Event, UserAndEvent
+from db.models.model import Event, UserAndEvent
 from fast_api.utils import get_events
 
 event_router = APIRouter(prefix='/events', tags=['Events'])

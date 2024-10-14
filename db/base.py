@@ -121,7 +121,7 @@ class AbstractClass:
 
     @classmethod
     async def get_from_user_id(cls, id_):
-        query = select(cls).where(cls.user_id == id_)
+        query = select(cls).where(cls.user_id == id_).order_by(cls.id).limit(20)
         return (await db.execute(query)).scalars().all()
 
     @classmethod
@@ -152,6 +152,12 @@ class AbstractClass:
     @classmethod
     async def delete(cls, id_):
         query = sqlalchemy_delete(cls).where(cls.id == id_)
+        await db.execute(query)
+        await cls.commit()
+
+    @classmethod
+    async def delete_question(cls, id_):
+        query = sqlalchemy_delete(cls).where(cls.user_id == id_)
         await db.execute(query)
         await cls.commit()
 
