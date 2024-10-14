@@ -15,6 +15,7 @@ class EventAdd(BaseModel):
     url: str
     timer: int
     coin: int
+    photo: str
 
 
 class EventList(BaseModel):
@@ -23,6 +24,7 @@ class EventList(BaseModel):
     timer: int
     url: str
     coin: int
+    photo: str
 
 
 @event_router.post("")
