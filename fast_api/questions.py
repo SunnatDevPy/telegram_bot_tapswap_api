@@ -89,14 +89,17 @@ async def question_add_delete_user(active: bool):
 @questions_router.post("/answer/")
 async def question_answer_add(user_id: int, question_id: int, answer: str):
     question = await ParamQuestion.get_question_from_user(user_id, question_id)
-    quest = await Questions.get(question.question_id)
     user = await User.get(user_id)
-    if quest.answer == answer:
-        await User.update(user_id, coins=user.coins + quest.ball)
-        await ParamQuestion.update_question(user_id, question_id, answer=True)
-        return {"answer": True, 'ball': quest.ball}
+    if question and user:
+        quest = await Questions.get(question.question_id)
+        if quest.answer == answer:
+            await User.update(user_id, coins=user.coins + quest.ball)
+            await ParamQuestion.update_question(user_id, question_id, answer=True)
+            return {"answer": True, 'ball': quest.ball}
+        else:
+            return {"answer": False}
     else:
-        return {"answer": False}
+        raise HTTPException(status_code=404, detail="Item not found")
 
 
 @questions_router.get('')
