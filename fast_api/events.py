@@ -51,8 +51,8 @@ async def event_add(user_id: int, event_id: int):
 
 @event_router.get('')
 async def event_list() -> list[EventList]:
-    event = await Event.get_alls()
-    return event
+    events = await Event.get_alls()
+    return events
 
 
 @event_router.get('/{user_id}')
