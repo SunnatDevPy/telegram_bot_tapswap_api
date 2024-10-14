@@ -59,6 +59,21 @@ async def experience_add(experience_id: Annotated[ExperienceAdd, Depends()]):
     return {'ok': True, "experience": experience.id}
 
 
+@experience.post("/add/")
+async def experience_add(user_id: int):
+    user = await User.get(user_id)
+    if user:
+        await UserAndExperience.delete_experience(user_id)
+        experience = await Experience.get_all()
+        for i in experience:
+            await UserAndExperience.create(user_id=user.id, degree=i.degree, hour_coin=i.hour_coin,
+                                           price=i.price,
+                                           experience_id=i.id)
+        return {'ok': True}
+    else:
+        raise HTTPException(status_code=404, detail="User topilmadi yoki daraja unga tegishli emas")
+
+
 @experience.get('')
 async def experience_list() -> list[ExperienceAdd]:
     experience = await Experience.get_alls()
