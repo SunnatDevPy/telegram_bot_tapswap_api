@@ -64,7 +64,7 @@ class EventPatch(BaseModel):
     name: Optional[str] = None
     url: Optional[str] = None
     coin: Optional[int] = None
-
+    photo: Optional[str] = None
 
 @event_router.patch("/{event_id}", response_model=EventPatch)
 async def event_patch(event_id: int, item: EventPatch):
