@@ -66,14 +66,15 @@ class EventPatch(BaseModel):
     coin: Optional[int] = None
     photo: Optional[str] = None
 
+
 @event_router.patch("/{event_id}", response_model=EventPatch)
 async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
     event = await Event.get(event_id)
     if event:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
-            await Event.update(event, **update_data)
-            return {"ok": True, "data": update_data}
+            await Event.update(event.id, **update_data)
+            return {"ok": True, "data": event}
         else:
             return {"ok": False, "message": "Nothing to update"}
     else:
