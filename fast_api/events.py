@@ -60,6 +60,17 @@ async def event_from_user_list(user_id: int):
     return await get_events(user_id)
 
 
+@event_router.get('/change/{user_id}')
+async def event_from_user_event(user_id: int):
+    events = await UserAndEvent.get_from_user_id(user_id)
+    if events:
+        for i in events:
+            await UserAndEvent.update(i.id, status=False)
+        return await get_events(user_id)
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
 class EventPatch(BaseModel):
     name: Optional[str] = None
     url: Optional[str] = None
