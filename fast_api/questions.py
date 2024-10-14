@@ -64,8 +64,6 @@ class ParamQuestionList(BaseModel):
     question_id: int
     user_id: int
     answer: bool
-    created_at: str
-    updated_at: str
 
 
 @questions_router.post("")
@@ -81,24 +79,24 @@ async def question_add_all_user(active: bool):
         return {'ok': True, "yes": "accsess"}
 
 
-@questions_router.post("/delete/{active}")
-async def question_add_all_user(active: bool):
+@questions_router.post("/delete/param/{active}")
+async def question_add_delete_user(active: bool):
     if active == True:
         await delete_question()
         return {'ok': True, "yes": "accsess"}
 
 
-@questions_router.post("/answer/{user_id}")
-async def question_add(user_id: int, question_id: int, answer: str):
+@questions_router.post("/answer/")
+async def question_answer_add(user_id: int, question_id: int, answer: str):
     question = await ParamQuestion.get_question_from_user(user_id, question_id)
-    quest = await Questions.get(question.id)
+    quest = await Questions.get(question.question_id)
     user = await User.get(user_id)
     if quest.answer == answer:
         await User.update(user_id, coins=user.coins + quest.ball)
         await ParamQuestion.update_question(user_id, question_id, answer=True)
-        return {'user_id': user, "answer": True, 'ball': quest.ball}
+        return {"answer": True, 'ball': quest.ball}
     else:
-        return {'user_id': user, "answer": False}
+        return {"answer": False}
 
 
 @questions_router.get('')
