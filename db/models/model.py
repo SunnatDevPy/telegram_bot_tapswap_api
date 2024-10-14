@@ -27,6 +27,7 @@ class Event(CreateModel):
     url: Mapped[str] = mapped_column(String)
     timer: Mapped[int] = mapped_column(Integer)
     coin: Mapped[int] = mapped_column(Integer)
+    photo: Mapped[str]
 
 
 class UserAndEvent(CreateModel):
