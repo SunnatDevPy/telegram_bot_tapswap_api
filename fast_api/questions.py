@@ -15,16 +15,20 @@ async def update_requests():
     questions = await Questions.get_all()
     users = await User.get_alls()
     for i in users:
-
-        random_questions = random.sample(questions, 20)
-        for j in random_questions:
+        if len(questions) >= 20:
+            randoms = random.sample(questions, 20)
+        else:
+            randoms = random.sample(questions, len(questions))
+        for j in randoms:
             await ParamQuestion.create(question_id=j.id, answer=False, user_id=i.id)
 
 
 questions_router = APIRouter(prefix='/questions', tags=['Questions'])
 scheduler = AsyncIOScheduler()
 scheduler.add_job(update_requests, CronTrigger(hour=0, minute=0))
-scheduler.start()
+
+
+# scheduler.start()
 
 
 class QuestionAdd(BaseModel):
@@ -52,6 +56,12 @@ class QuestionList(BaseModel):
 async def question_add(question_item: Annotated[QuestionAdd, Depends()]):
     question = await Questions.create(**question_item.dict())
     return {'ok': True, "id": question.id}
+
+
+@questions_router.post("/{active}")
+async def question_add(active: bool):
+    await update_requests()
+    return {'ok': True, "id": "accsess"}
 
 
 @questions_router.post("/answer/{user_id}")

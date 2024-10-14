@@ -1,3 +1,5 @@
+import random
+
 from aiogram import Router, Bot, html
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
@@ -7,7 +9,7 @@ from aiogram.utils.i18n import gettext as _
 from bot.buttuns.inline import main_menu, contact, language_inl
 from bot.state.states import Contact
 from config import BOT
-from db import User, Statusie, Experience
+from db import User, Statusie, Experience, Questions, ParamQuestion
 from db.models.model import UserAndExperience, Referral, Event, UserAndEvent
 
 start_router = Router()
@@ -56,6 +58,13 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                                            experience_id=i.id)
         for i in await Event.get_all():
             await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
+        questions = await Questions.get_all()
+        if len(questions) >= 20:
+            randoms = random.sample(questions, 20)
+        else:
+            randoms = random.sample(questions, len(questions))
+        for j in randoms:
+            await ParamQuestion.create(question_id=j.id, answer=False, user_id=message.from_user.id)
         if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
             await message.answer(f'Xush kelibsiz Admin {message.from_user.first_name}',
                                  reply_markup=main_menu(message.from_user.id, data.get('locale'), admin=True, ))

@@ -1,7 +1,6 @@
 from aiogram import Router, F, Bot
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, ReplyKeyboardRemove
-from aiogram.utils import i18n
 from aiogram.utils.i18n import gettext as _
 
 from bot.buttuns.inline import main_menu, make_channels, contact
