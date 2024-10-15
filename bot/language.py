@@ -27,7 +27,11 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
                                       reply_markup=await make_channels(channels, bot))
     else:
         user = await User.get(call.from_user.id)
-        salom = _("Assalomu aleykum")
+        if lang_code == 'rus':
+            salom = "Здравствуйте"
+        else:
+            salom = "Assalomu aleykum"
+
         davom = _("davom etish uchun contact yuboring")
         xush = _("Xush kelibsiz")
         if not user:
