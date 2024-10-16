@@ -271,4 +271,4 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.answer(_("<b>Davlatlar️</b>"), parse_mode='HTML', reply_markup=country_btn())
     if data[-1] == 'world':
         await call.message.delete()
-        await call.message.answer(_("<b>Davlatlar️</b>"), parse_mode='HTML', reply_markup=world_game())
+        await call.message.answer(_("<b>Liagalr</b>"), parse_mode='HTML', reply_markup=world_game())
