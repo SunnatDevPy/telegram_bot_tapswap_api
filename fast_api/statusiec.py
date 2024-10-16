@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -40,9 +40,9 @@ async def status_detail(status_id: int):
 
 
 class StatusPatch(BaseModel):
-    name: str
-    limit_coin: int
-    level: int
+    name: Optional[str] = None
+    limit_coin: Optional[int] = None
+    level: Optional[int] = None
 
 
 @status_router.patch("/{status_id}", response_model=StatusPatch)
@@ -59,8 +59,8 @@ async def status_patch(status_id: int, item: Annotated[StatusPatch, Depends()]):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@status_router.put("/{status_id}", response_model=StatusAdd)
-async def status_put(status_id: int, items: StatusAdd):
+@status_router.put("/{status_id}", response_model=StatusPatch)
+async def status_put(status_id: int, items: StatusPatch):
     status = await Statusie.get(status_id)
     if status:
         await Statusie.update(status.id, **items.dict())
