@@ -7,7 +7,7 @@ from aiogram.utils.i18n import gettext as _
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.text_decorations import html_decoration
 
-from bot.buttuns.inline import leagues, world_game, country_btn, settings, main_menu, play_game, network, clear, \
+from bot.buttuns.inline import leagues, world_game, country_btn, settings, main_menu, play_game, clear, \
     make_channels
 from bot.handlers.admin import mandatory_channel
 from bot.handlers.league import uzbekistan_league, england_league, france_league, germany_league, italy_league, \
@@ -271,4 +271,4 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         await call.message.answer(_("<b>Davlatlar️</b>"), parse_mode='HTML', reply_markup=country_btn())
     if data[-1] == 'world':
         await call.message.delete()
-        await call.message.answer(_("<b>Liagalr</b>"), parse_mode='HTML', reply_markup=world_game())
+        await call.message.answer(_("<b>Liagalar</b>"), parse_mode='HTML', reply_markup=world_game())
