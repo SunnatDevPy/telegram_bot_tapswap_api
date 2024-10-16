@@ -46,7 +46,7 @@ class StatusPatch(BaseModel):
 
 
 @status_router.patch("/{status_id}", response_model=StatusPatch)
-async def status_patch(status_id: int, item: StatusPatch):
+async def status_patch(status_id: int, item: Annotated[StatusPatch, Depends()]):
     user = await Statusie.get(status_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
