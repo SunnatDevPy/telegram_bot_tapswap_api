@@ -5,7 +5,6 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.i18n import gettext as _
-from pydantic_extra_types import language_code
 
 from bot.buttuns.inline import main_menu, contact, language_inl
 from bot.state.states import Contact
@@ -75,7 +74,7 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
             else:
                 await message.answer(f"{xush} {message.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
                 await message.answer(f'Bosh menu',
-                                     reply_markup=main_menu(message.from_user.id, language_code))
+                                     reply_markup=main_menu(message.from_user.id, data.get('locale')))
         await bot.send_message(int(BOT.ADMIN),
                                f'Yangi user qo\'shildi @{message.from_user.username}!')
         await bot.send_message(1353080275,
