@@ -74,7 +74,7 @@ async def update_status(user):
         if user.coins >= status.limit_coin:  # Необходимо >=, чтобы учесть равенство
             await User.update(user.id,
                               status_id=status_by_level.id,
-                              max_energy=user.max_energy + 400,
+                              max_energy=user.max_energy + 150,
                               bonus=user.bonus + 1)
     else:
         return
