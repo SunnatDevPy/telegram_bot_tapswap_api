@@ -15,7 +15,7 @@ async def update_requests():
     questions = await Questions.get_all()
     users = await User.get_alls()
     for i in users:
-        if len(questions) >= 20:
+        if len(questions) >= 5:
             randoms = random.sample(questions, 5)
         else:
             randoms = random.sample(questions, len(questions))
@@ -151,6 +151,21 @@ async def question_patch(question_id: int, item: Annotated[QuestionPatch, Depend
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
             await Questions.update(question_id, **update_data)
+            return {"ok": True, "data": update_data}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@questions_router.patch("/all/")
+async def question_all_update(item: Annotated[QuestionPatch, Depends()]):
+    question = await Questions.get_all()
+    if question:
+        update_data = {k: v for k, v in item.dict().items() if v is not None}
+        if update_data:
+            for i in question:
+                await Questions.update(i.id, **update_data)
             return {"ok": True, "data": update_data}
         else:
             return {"ok": False, "message": "Nothing to update"}
