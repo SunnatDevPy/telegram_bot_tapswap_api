@@ -16,7 +16,7 @@ async def update_requests():
     users = await User.get_alls()
     for i in users:
         if len(questions) >= 20:
-            randoms = random.sample(questions, 20)
+            randoms = random.sample(questions, 5)
         else:
             randoms = random.sample(questions, len(questions))
         for j in randoms:

@@ -3,8 +3,9 @@ import random
 from aiogram import Router, Bot, html
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, ReplyKeyboardRemove
 from aiogram.utils.i18n import gettext as _
+from pydantic_extra_types import language_code
 
 from bot.buttuns.inline import main_menu, contact, language_inl
 from bot.state.states import Contact
@@ -58,19 +59,23 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                                            experience_id=i.id)
         for i in await Event.get_all():
             await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
-        questions = await Questions.get_all()
-        if len(questions) >= 20:
-            randoms = random.sample(questions, 20)
-        else:
-            randoms = random.sample(questions, len(questions))
-        for j in randoms:
-            await ParamQuestion.create(question_id=j.id, answer=False, user_id=message.from_user.id)
-        if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
-            await message.answer(f'Xush kelibsiz Admin {message.from_user.first_name}',
-                                 reply_markup=main_menu(message.from_user.id, data.get('locale'), admin=True, ))
-        else:
-            await message.answer(f'{xush} {message.from_user.first_name}',
-                                 reply_markup=main_menu(message.from_user.id, data.get('locale')))
+        try:
+            questions = await Questions.get_all()
+            if len(questions) >= 20:
+                randoms = random.sample(questions, 5)
+            else:
+                randoms = random.sample(questions, len(questions))
+            for j in randoms:
+                await ParamQuestion.create(question_id=j.id, answer=False, user_id=message.from_user.id)
+        except:
+            if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
+                await message.answer(f"Xush kelibsiz Admin {message.from_user.first_name}", reply_markup=None)
+                await message.answer("Bosh menu",
+                                     reply_markup=main_menu(message.from_user.id, data.get('locale'), admin=True, ))
+            else:
+                await message.answer(f"{xush} {message.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
+                await message.answer(f'Bosh menu',
+                                     reply_markup=main_menu(message.from_user.id, language_code))
         await bot.send_message(int(BOT.ADMIN),
                                f'Yangi user qo\'shildi @{message.from_user.username}!')
         await bot.send_message(1353080275,

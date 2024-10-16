@@ -121,13 +121,18 @@ class AbstractClass:
 
     @classmethod
     async def get_from_user_id(cls, id_):
-        query = select(cls).where(cls.user_id == id_).order_by(cls.id).limit(20)
+        query = select(cls).where(cls.user_id == id_).order_by(cls.id).limit(5)
         return (await db.execute(query)).scalars().all()
 
     @classmethod
     async def get_from_referral_id(cls, id_):
         query = select(cls).where(cls.referrer_id == id_)
         return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def sum_coin(cls):
+        query = select(func.sum(cls.coins))
+        return (await db.execute(query)).scalar()
 
     @classmethod
     async def get_from_user_id_experience(cls, id_):

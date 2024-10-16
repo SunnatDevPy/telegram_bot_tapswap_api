@@ -44,8 +44,6 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
                 await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
                                           reply_markup=main_menu(call.from_user.id, lang_code, admin=True))
             else:
-                await call.message.answer(
-                    "Assalomu alaykum STOCKFOOTBALL botga xush kelibsiz. Siz bu bot orqali sovgalarga ega bolishingiz, futbol uchrashuvlarini jonli ko'rishingiz va o'yinlar haqida ma'lumotlar olishingiz mumkin",
-                    reply_markup=ReplyKeyboardRemove())
-                await call.message.answer(f'{xush} {call.from_user.first_name}',
+                await call.message.answer(f"{xush} {call.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
+                await call.message.answer(f'Bosh menu',
                                           reply_markup=main_menu(call.from_user.id, lang_code))

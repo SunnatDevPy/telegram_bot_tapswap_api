@@ -113,6 +113,13 @@ async def user_get_friends(user_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
+@user_router.get("/sum/")
+async def user_sum_coin():
+    sum = await User.sum_coin()
+
+    return {"sum coin": f"{int(sum):_}"}
+
+
 async def increase_energy(user_id, energy, max_energy):
     while max_energy != energy:
         energy += 4
