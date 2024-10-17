@@ -43,7 +43,7 @@ active_tasks = {}
 
 
 async def claim_friends(user):
-    await asyncio.sleep(15)
+    await asyncio.sleep(28800)
     if user.id in active_tasks:
         del active_tasks[user.id]
 
@@ -63,7 +63,7 @@ async def activate_user(user_id: int):
             task = asyncio.create_task(claim_friends(user))
             active_tasks[user_id] = task
             return {'ok': True, "start_time": utc_now.astimezone(timezone),
-                    "end_time": utc_now.astimezone(timezone) + timedelta(seconds=15),
+                    "end_time": utc_now.astimezone(timezone) + timedelta(seconds=28800),
                     "firends_coin": coin * 8}
 
     else:
