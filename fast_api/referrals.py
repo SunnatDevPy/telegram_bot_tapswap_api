@@ -64,7 +64,7 @@ async def activate_user(user_id: int):
                 active_tasks[user_id] = task
                 return {'ok': True, "start_time": utc_now.astimezone(timezone),
                         "end_time": utc_now.astimezone(timezone) + timedelta(seconds=15),
-                        "firends_coin": coin * 8, "status": 'active'}
+                        "firends_coin": coin * 8}
         else:
             raise HTTPException(status_code=404, detail="0 coinga activ berolmisz")
     else:
