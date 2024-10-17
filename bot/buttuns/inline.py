@@ -14,7 +14,7 @@ def main_menu(user_id, language='uz', admin=False):
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
                                    web_app=WebAppInfo(
-                                       url=f'https://stock-football-mini-app.vercel.app/#/{user_id}/{language}/')),
+                                       url=f'https://football-stock.uz/#/{user_id}/{language}/')),
               InlineKeyboardButton(text="🇪🇺 Yevro turnirlar", callback_data='game_world'),
               InlineKeyboardButton(text="⚽ Turnirlar", callback_data='game_country'),
               ])
