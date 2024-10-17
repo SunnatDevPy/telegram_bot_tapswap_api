@@ -40,10 +40,7 @@ active_tasks = {}
 
 
 async def claim_friends(user):
-    coin = await friends_coin(user.id)
     await asyncio.sleep(15)
-    hour_coin = coin * 2
-    await User.update(user.id, coins=user.coins + hour_coin)
     if user.id in active_tasks:
         del active_tasks[user.id]
 
@@ -56,10 +53,26 @@ async def activate_user(user_id: int):
         coin = await friends_coin(user_id)
         if user_id in active_tasks:
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
-        task = asyncio.create_task(claim_friends(user))
-        active_tasks[user_id] = task
-        return {'ok': True, "start_time": datetime.datetime.now(),
-                "end_time": datetime.datetime.now() + timedelta(seconds=15),
-                "firends_coin": coin * 2}
+        else:
+            task = asyncio.create_task(claim_friends(user))
+            active_tasks[user_id] = task
+            return {'ok': True, "start_time": datetime.datetime.now(),
+                    "end_time": datetime.datetime.now() + timedelta(seconds=15),
+                    "firends_coin": coin * 8}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@referral_router.post('/claim/{user_id}')
+async def activate_user(user_id: int):
+    user = await User.get(user_id)
+    if user:
+        coin = await friends_coin(user_id)
+        if user_id in active_tasks:
+            raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
+        else:
+            await User.update(user_id, coins=user.coin + coin)
+            return {'ok': True,
+                    "firends_coin": coin * 8}
     else:
         raise HTTPException(status_code=404, detail="Item not found")

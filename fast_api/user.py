@@ -6,7 +6,6 @@ from pydantic import BaseModel
 
 from db import User, Statusie
 from db.models.model import UserAndExperience
-from fast_api.jwt_ import get_current_user
 from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, top_players_from_statu_rank
 
 user_router = APIRouter(prefix='/users', tags=['User'])
