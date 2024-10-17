@@ -83,7 +83,7 @@ async def friends_coin(user_id):
     friends_price = 0
     for i in await Referral.get_from_referral_id(user_id):
         user: User = await User.get(i.referred_user_id)
-        friends_price += int((user.coins * 2.5) / 100)
+        friends_price += int((user.coins * 1.5) / 100)
     return friends_price
 
 

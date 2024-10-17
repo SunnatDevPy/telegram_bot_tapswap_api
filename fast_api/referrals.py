@@ -53,12 +53,13 @@ async def activate_user(user_id: int):
     user = await User.get(user_id)
     if user:
         print(active_tasks)
+        coin = await friends_coin(user_id)
         if user_id in active_tasks:
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
         task = asyncio.create_task(claim_friends(user))
         active_tasks[user_id] = task
         return {'ok': True, "start_time": datetime.datetime.now(),
                 "end_time": datetime.datetime.now() + timedelta(seconds=15),
-                "hour_coin_8": user.hour_coin * 2}
+                "firends_coin": coin * 2}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
