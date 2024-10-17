@@ -42,9 +42,8 @@ async def event_add(user_id: int, event_id: int):
     event = await Event.get(event_id)
     user = await User.get(user_id)
     if event and user:
-        await UserAndEvent.update_event(user_id, event_id, status=True)
-        await User.update(user_id, coins=user.coins + event.coin)
-        return {'ok': True, "user": user, "ball": event.coin}
+        await UserAndEvent.update_event(user_id, event.id, status="active")
+        return {'ok': True, "status": "active"}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -61,11 +60,11 @@ async def event_from_user_list(user_id: int):
 
 
 @event_router.post('/change/{user_id}')
-async def event_from_user_event(user_id: int):
+async def event_from_user_param(user_id: int):
     events = await UserAndEvent.get_from_user_id(user_id)
     if events:
         for i in events:
-            await UserAndEvent.update(i.id, status=False)
+            await UserAndEvent.update(i.id, status='active', claim=False)
         return await get_events(user_id)
     else:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -78,7 +77,7 @@ async def event_from_user():
     if events:
         for user in users:
             for event in events:
-                await UserAndEvent.create(user_id=user.id, event_id=event.id, status=False)
+                await UserAndEvent.create(user_id=user.id, event_id=event.id, status='default', claim=False)
         return {"ok": True}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -90,8 +89,9 @@ async def event_from_user_delete(user_id: int, event_id: int):
     userevent = await UserAndEvent.get(event_id)
     event = await Event.get(event_id)
     if user and event or user and userevent:
+        await UserAndEvent.update_event(user_id, event.id, claim=True, status='claim')
         await User.update(user.id, coins=user.coins + 10000)
-        return {"ok": True}
+        return {"ok": True, "calim": True, "status": 'claim'}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -116,8 +116,9 @@ class EventPatch(BaseModel):
 
 class ParamEventPatch(BaseModel):
     event_id: Optional[int] = None
-    status: Optional[bool] = None
+    status: Optional[str] = None
     user_id: Optional[int] = None
+    claim: Optional[bool] = None
 
 
 @event_router.patch("/{event_id}", response_model=EventPatch)
@@ -128,21 +129,6 @@ async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
         if update_data:
             await Event.update(event.id, **update_data)
             return {"ok": True, "data": event}
-        else:
-            return {"ok": False, "message": "Nothing to update"}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-
-@event_router.patch("/param/all/")
-async def param_events_all_update(item: Annotated[EventPatch, Depends()]):
-    question = await UserAndEvent.get_all()
-    if question:
-        update_data = {k: v for k, v in item.dict().items() if v is not None}
-        if update_data:
-            for i in question:
-                await UserAndEvent.update(i.id, **update_data)
-            return {"ok": True, "data": update_data}
         else:
             return {"ok": False, "message": "Nothing to update"}
     else:

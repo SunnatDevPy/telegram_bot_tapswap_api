@@ -79,7 +79,7 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                                       referred_user_id=data.get("referred_user_id"))
                 await User.update(user.id, coins=user.coins + 5000)
             for i in await Event.get_alls():
-                await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
+                await UserAndEvent.create(user_id=user.id, event_id=i.id, status='default', claim=False)
             questions = await Questions.get_alls()
             if len(questions) >= 20:
                 randoms = random.sample(questions, 5)
