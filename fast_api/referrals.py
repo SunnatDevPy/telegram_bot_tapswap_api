@@ -70,7 +70,7 @@ async def activate_user(user_id: int):
         if user_id in active_tasks:
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
         else:
-            await User.update(user_id, coins=user.coin + coin)
+            await User.update(user_id, coins=user.coins + coin)
             return {'ok': True,
                     "firends_coin": coin * 8}
     else:
