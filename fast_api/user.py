@@ -110,7 +110,7 @@ async def user_get_friends(user_id: int):
 
 
 @user_router.get("/friends/{user_id}")
-async def user_get_friends(user_id: Annotated[UserId, Depends()]):
+async def user_get_friends(user_id: int):
     user = await User.get(user_id)
     if user:
         friend = await friends_detail(user.id)
