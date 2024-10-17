@@ -21,8 +21,7 @@ class RefferalList(BaseModel):
 
 
 timezone = pytz.timezone('Asia/Tashkent')
-utc_now = datetime.datetime.utcnow()
-local_time = utc_now.astimezone(timezone)
+
 
 
 @referral_router.post("/{user_id}")
@@ -59,10 +58,12 @@ async def activate_user(user_id: int):
         if user_id in active_tasks:
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
         else:
+            utc_now = datetime.datetime.utcnow()
+            local_time = utc_now.astimezone(timezone)
             task = asyncio.create_task(claim_friends(user))
             active_tasks[user_id] = task
-            return {'ok': True, "start_time": datetime.datetime.now(),
-                    "end_time": datetime.datetime.now() + timedelta(seconds=15),
+            return {'ok': True, "start_time": utc_now.astimezone(timezone),
+                    "end_time": utc_now.astimezone(timezone) + timedelta(seconds=15),
                     "firends_coin": coin * 8, "status": 'active'}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
