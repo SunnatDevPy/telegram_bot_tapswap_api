@@ -23,7 +23,6 @@ class RefferalList(BaseModel):
 timezone = pytz.timezone('Asia/Tashkent')
 
 
-
 @referral_router.post("/{user_id}")
 async def register_user(user_id: int):
     return {"url": f"https://t.me/share/url?url=https://t.me/Stockfootball_bot?start={user_id}"}
