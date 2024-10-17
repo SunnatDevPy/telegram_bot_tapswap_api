@@ -66,7 +66,7 @@ async def activate_user(user_id: int):
                         "end_time": utc_now.astimezone(timezone) + timedelta(seconds=15),
                         "firends_coin": coin * 8}
         else:
-            raise HTTPException(status_code=404, detail="0 coinga activ berolmisz")
+            raise HTTPException(status_code=400, detail="0 coinga activ berolmisz")
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
