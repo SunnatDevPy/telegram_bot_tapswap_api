@@ -81,7 +81,7 @@ async def update_status(user):
 
 
 class UserId(BaseModel):
-    first_name: Optional[str] = None
+    id: Optional[int] = None
 
 
 @user_router.get("/{user_id}")
