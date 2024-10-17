@@ -14,9 +14,20 @@ language_router = Router()
 @language_router.callback_query(F.data.startswith('lang_'))
 async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
     lang_code = call.data.split('lang_')[-1]
+    if lang_code == 'rus':
+        salom = "Здравствуйте"
+        bosh = 'Главное меню'
+        davom = "отправьте контакт, чтобы продолжить"
+        til = "Язык выбран"
+
+    else:
+        til = "Til tanlandi"
+        salom = "Assalomu aleykum"
+        bosh = 'Bosh menu'
+        davom = "davom etish uchun contact yuboring"
     await call.message.delete()
     await state.update_data(locale=lang_code)
-    await call.answer(_('Til tanlandi', locale=lang_code), show_alert=True)
+    await call.answer(til, show_alert=True)
     channels = await mandatory_channel(call.from_user.id, bot)
     if channels:
         try:
@@ -27,13 +38,6 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
                                       reply_markup=await make_channels(channels, bot))
     else:
         user = await User.get(call.from_user.id)
-        if lang_code == 'rus':
-            salom = "Здравствуйте"
-        else:
-            salom = "Assalomu aleykum"
-
-        davom = _("davom etish uchun contact yuboring")
-        xush = _("Xush kelibsiz")
         if not user:
             await state.set_state(Contact.phone)
             await call.message.answer(
@@ -44,6 +48,6 @@ async def language_handler(call: CallbackQuery, state: FSMContext, bot: Bot):
                 await call.message.answer(f'Xush kelibsiz Admin {call.from_user.first_name}',
                                           reply_markup=main_menu(call.from_user.id, lang_code, admin=True))
             else:
-                await call.message.answer(f"{xush} {call.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
-                await call.message.answer(f'Bosh menu',
+                await call.message.answer(f"{salom} {call.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
+                await call.message.answer(bosh,
                                           reply_markup=main_menu(call.from_user.id, lang_code))

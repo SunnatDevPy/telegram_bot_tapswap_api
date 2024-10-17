@@ -1,5 +1,3 @@
-import bcrypt
-import requests
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, KeyboardButton, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder, ReplyKeyboardBuilder
@@ -10,13 +8,19 @@ FASTAPI_URL = "https://yengi.mussi.uz/token"
 
 
 def main_menu(user_id, language='uz', admin=False):
+    if language == 'rus':
+        tur = "⚽ Турниры"
+        world = '🇪🇺 Евро турниры'
+    else:
+        world = "🇪🇺 Yevro turnirlar"
+        tur = "⚽ Turnirlar"
     print(language)
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🔴LIVE🔴",
                                    web_app=WebAppInfo(
                                        url=f'https://football-stock.uz/#/{user_id}/{language}/')),
-              InlineKeyboardButton(text="🇪🇺 Yevro turnirlar", callback_data='game_world'),
-              InlineKeyboardButton(text="⚽ Turnirlar", callback_data='game_country'),
+              InlineKeyboardButton(text=world, callback_data='game_world'),
+              InlineKeyboardButton(text=tur, callback_data='game_country'),
               ])
     if admin:
         ikb.add(*[InlineKeyboardButton(text="⚙️Settings⚙️", callback_data='game_settings')])
@@ -51,11 +55,19 @@ async def admins():
     return ikb.as_markup()
 
 
-def play_game(back):
+def play_game(back, language="uz"):
+    if language == 'rus':
+        nat = "🔵Результаты🔵"
+        live = "⚽️Живые игры⚽️"
+        ortga = "⬅️Назад"
+    else:
+        ortga = "⬅️Ortga"
+        live = "⚽️Live o'yinlar⚽️"
+        nat = "🔵Natijalar🔵"
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="⚽️Live o'yinlar⚽️", callback_data='live'),
-              InlineKeyboardButton(text="🔵Natijalar🔵", callback_data='old_game'),
-              InlineKeyboardButton(text="⬅️Ortga", callback_data=f'back_{back}')])
+    ikb.add(*[InlineKeyboardButton(text=live, callback_data='live'),
+              InlineKeyboardButton(text=nat, callback_data='old_game'),
+              InlineKeyboardButton(text=ortga, callback_data=f'back_{back}')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
@@ -101,21 +113,35 @@ def confirm_text():
     return ikb.as_markup()
 
 
-def world_game():
+def world_game(language='uz'):
+    if language == 'rus':
+        chemp = "Лига Чемпионов УЕФА"
+        evro = "Лига Европы УЕФА"
+        ortga = "Назад"
+        konf = "Конференция Лиги"
+    else:
+        ortga = "Ortga"
+        chemp = "UEFA Chempionlar ligasi"
+        evro = "UEFA Yevropa ligasi"
+        konf = "Konferensiyalar ligasi"
     ikb = InlineKeyboardBuilder()
-    ikb.add(*[InlineKeyboardButton(text="🏆UEFA Chempionlar ligasi",
-                                   callback_data="cup_2_UEFA Chempionlar ligasi"),
-              InlineKeyboardButton(text="🏆UEFA Yevropa ligasi",
-                                   callback_data="cup_3_UEFA Yevropa ligasi"),
-              InlineKeyboardButton(text="🏆Konferensiyalar ligasi",
-                                   callback_data='cup_21_Konferensiy ligasi'),
-              InlineKeyboardButton(text="⬅️Ortga",
+    ikb.add(*[InlineKeyboardButton(text=f"🏆{chemp}",
+                                   callback_data=f"cup_2_{chemp}"),
+              InlineKeyboardButton(text=f"🏆{evro}",
+                                   callback_data=f"cup_3_{evro}"),
+              InlineKeyboardButton(text=f"🏆{konf}",
+                                   callback_data=f'cup_21_{konf}'),
+              InlineKeyboardButton(text=f"⬅️{ortga}",
                                    callback_data='back_home')])
     ikb.adjust(2, 1, 1)
     return ikb.as_markup()
 
 
-def country_btn():
+def country_btn(language='uz'):
+    if language == 'rus':
+        ortga = "⬅️Назад"
+    else:
+        ortga = "⬅️Ortga"
     ikb = InlineKeyboardBuilder()
     ikb.add(*[InlineKeyboardButton(text="🇺🇿Uzbekistan🇺🇿",
                                    callback_data="country_Uzbekistan"),  # ✅
@@ -132,17 +158,21 @@ def country_btn():
               InlineKeyboardButton(text="🇪🇸Spain🇪🇸",
                                    callback_data='country_Spain'),  # ✅
               ])
-    ikb.add(*[InlineKeyboardButton(text="⬅️Ortga",
+    ikb.add(*[InlineKeyboardButton(text=ortga,
                                    callback_data='back_home')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()
 
 
-def leagues(res, back='home'):
+def leagues(res, back='home', language='uz'):
+    if language == 'rus':
+        ortga = "⬅️Назад"
+    else:
+        ortga = "⬅️Ortga"
     ikb = InlineKeyboardBuilder()
     for i in res:
         ikb.add(*[InlineKeyboardButton(text=i['name'], callback_data=f"league_{i['name']}_{i['id']}")])
-    ikb.add(*[InlineKeyboardButton(text="⬅️Ortga",
+    ikb.add(*[InlineKeyboardButton(text=ortga,
                                    callback_data=f'back_{back}')])
     ikb.adjust(2, repeat=True)
     return ikb.as_markup()

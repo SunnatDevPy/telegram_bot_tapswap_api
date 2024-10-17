@@ -60,13 +60,37 @@ async def event_from_user_list(user_id: int):
     return await get_events(user_id)
 
 
-@event_router.get('/change/{user_id}')
+@event_router.post('/change/{user_id}')
 async def event_from_user_event(user_id: int):
     events = await UserAndEvent.get_from_user_id(user_id)
     if events:
         for i in events:
             await UserAndEvent.update(i.id, status=False)
         return await get_events(user_id)
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@event_router.post('/all/user/')
+async def event_from_user():
+    events = await UserAndEvent.get_alls()
+    users = await User.get_alls()
+    if events:
+        for event in events:
+            for user in users:
+                await UserAndEvent.create(user_id=user.id, event_id=event.id, status=False)
+        return {"ok": True}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@event_router.post('/delete/user/')
+async def event_from_user_delete():
+    users = await User.get_alls()
+    if users:
+        for user in users:
+            await UserAndEvent.delete_question(user.id)
+        return {"ok": True}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -78,6 +102,12 @@ class EventPatch(BaseModel):
     photo: Optional[str] = None
 
 
+class ParamEventPatch(BaseModel):
+    event_id: Optional[int] = None
+    status: Optional[bool] = None
+    user_id: Optional[int] = None
+
+
 @event_router.patch("/{event_id}", response_model=EventPatch)
 async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
     event = await Event.get(event_id)
@@ -86,6 +116,36 @@ async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
         if update_data:
             await Event.update(event.id, **update_data)
             return {"ok": True, "data": event}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@event_router.patch("/param/all/")
+async def param_events_all_update(item: Annotated[EventPatch, Depends()]):
+    question = await UserAndEvent.get_all()
+    if question:
+        update_data = {k: v for k, v in item.dict().items() if v is not None}
+        if update_data:
+            for i in question:
+                await UserAndEvent.update(i.id, **update_data)
+            return {"ok": True, "data": update_data}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@event_router.patch("/all/")
+async def events_all_update(item: Annotated[EventPatch, Depends()]):
+    question = await Event.get_all()
+    if question:
+        update_data = {k: v for k, v in item.dict().items() if v is not None}
+        if update_data:
+            for i in question:
+                await Event.update(i.id, **update_data)
+            return {"ok": True, "data": update_data}
         else:
             return {"ok": False, "message": "Nothing to update"}
     else:

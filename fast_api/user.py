@@ -46,6 +46,16 @@ async def user_add(user: Annotated[UserAdd, Depends()]):
     return {'ok': True, "id": user.id}
 
 
+@user_router.post("/actives/{active}")
+async def all_users_default(active: bool):
+    if active:
+        users = await User.get_alls()
+        for i in users:
+            await User.update(i.id, coins=0, energy=200, status_id=1)
+        return {'ok': True}
+    return {'ok': False}
+
+
 @user_router.get('')
 async def user_list() -> list[UserList]:
     users = await User.get_all()
