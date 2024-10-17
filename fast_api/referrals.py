@@ -3,6 +3,7 @@ import datetime
 from datetime import timedelta
 from typing import Annotated
 
+import pytz
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
@@ -17,6 +18,11 @@ class RefferalList(BaseModel):
     referrer_id: int
     referred_user_id: int
     created_at: datetime.datetime
+
+
+timezone = pytz.timezone('Asia/Tashkent')
+utc_now = datetime.datetime.utcnow()
+local_time = utc_now.astimezone(timezone)
 
 
 @referral_router.post("/{user_id}")
