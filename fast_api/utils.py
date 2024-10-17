@@ -16,7 +16,6 @@ async def get_events(user_id):
             "coin": event.coin,
             "timer": event.timer,
             "photo": event.photo
-
         })
     return list_
 
