@@ -35,9 +35,6 @@ scheduler.add_job(delete_question, CronTrigger(hour=0, minute=0))
 scheduler.add_job(update_requests, CronTrigger(hour=2, minute=0))
 
 
-# scheduler.start()
-
-
 class QuestionAdd(BaseModel):
     description: str
     a: str

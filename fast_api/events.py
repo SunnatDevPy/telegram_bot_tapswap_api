@@ -84,7 +84,7 @@ async def event_from_user():
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@event_router.post('/claim/event/')
+@event_router.post('/claim/')
 async def event_from_user_delete(user_id: int, event_id: int):
     user = await User.get(user_id)
     userevent = await UserAndEvent.get(event_id)
