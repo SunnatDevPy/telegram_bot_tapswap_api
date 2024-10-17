@@ -106,7 +106,6 @@ class ParamEventPatch(BaseModel):
     event_id: Optional[int] = None
     status: Optional[str] = None
     user_id: Optional[int] = None
-    claim: Optional[bool] = None
 
 
 @event_router.patch("/{event_id}", response_model=EventPatch)
