@@ -188,6 +188,6 @@ async def user_coin_energy_update(coin: int, energy: int, user_id: int):
 
 
 @user_router.delete("/")
-async def user_delete(user: int):
-    await User.delete(user.id)
-    return {"ok": True, 'id': user.id}
+async def user_delete(user_id: int):
+    await User.delete(user_id)
+    return {"ok": True, 'id': user_id}
