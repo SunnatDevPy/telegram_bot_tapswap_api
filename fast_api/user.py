@@ -123,7 +123,7 @@ async def user_get_friends(user_id: int):
     user = await User.get(user_id)
     if user:
         friend = await friends_detail(user.id)
-        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1]}
+        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1], }
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 

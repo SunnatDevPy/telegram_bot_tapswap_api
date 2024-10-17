@@ -42,8 +42,9 @@ async def event_add(user_id: int, event_id: int):
     event = await Event.get(event_id)
     user = await User.get(user_id)
     if event and user:
-        await UserAndEvent.update_event(user_id, event.id, status="active")
-        return {'ok': True, "status": "active"}
+        await UserAndEvent.update_event(user_id, event_id, status=True)
+        await User.update(user_id, coins=user.coins + event.coin)
+        return {'ok': True, "user": user, "ball": event.coin}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -60,11 +61,11 @@ async def event_from_user_list(user_id: int):
 
 
 @event_router.post('/change/{user_id}')
-async def event_from_user_param(user_id: int):
+async def event_from_user_event(user_id: int):
     events = await UserAndEvent.get_from_user_id(user_id)
     if events:
         for i in events:
-            await UserAndEvent.update(i.id, status='active', claim=False)
+            await UserAndEvent.update(i.id, status=False)
         return await get_events(user_id)
     else:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -77,21 +78,8 @@ async def event_from_user():
     if events:
         for user in users:
             for event in events:
-                await UserAndEvent.create(user_id=user.id, event_id=event.id, status='default', claim=False)
+                await UserAndEvent.create(user_id=user.id, event_id=event.id, status=False)
         return {"ok": True}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-
-@event_router.post('/claim/')
-async def event_from_user_delete(user_id: int, event_id: int):
-    user = await User.get(user_id)
-    userevent = await UserAndEvent.get(event_id)
-    event = await Event.get(event_id)
-    if user and event or user and userevent:
-        await UserAndEvent.update_event(user_id, event.id, claim=True, status='claim')
-        await User.update(user.id, coins=user.coins + 10000)
-        return {"ok": True, "calim": True, "status": 'claim'}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 

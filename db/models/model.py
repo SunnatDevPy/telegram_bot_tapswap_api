@@ -34,8 +34,7 @@ class UserAndEvent(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("users.id", ondelete='CASCADE'), sort_order=1, index=True)
     event_id: Mapped[int] = mapped_column(Integer, ForeignKey('events.id', ondelete="CASCADE"))
-    status: Mapped[str] = mapped_column(default="default")
-    claim: Mapped[bool] = mapped_column(default=False)
+    status: Mapped[bool] = mapped_column(Boolean, default=False)
 
 
 class Experience(CreateModel):

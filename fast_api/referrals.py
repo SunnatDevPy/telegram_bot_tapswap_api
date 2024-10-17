@@ -57,7 +57,7 @@ async def activate_user(user_id: int):
             active_tasks[user_id] = task
             return {'ok': True, "start_time": datetime.datetime.now(),
                     "end_time": datetime.datetime.now() + timedelta(seconds=15),
-                    "firends_coin": coin * 8}
+                    "firends_coin": coin * 8, "status": 'active', "claim": False}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -72,6 +72,6 @@ async def activate_user(user_id: int):
         else:
             await User.update(user_id, coins=user.coins + coin)
             return {'ok': True,
-                    "firends_coin": coin * 8}
+                    "firends_coin": coin * 8, "status": 'active', "claim": False}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
