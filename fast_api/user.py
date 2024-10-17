@@ -80,6 +80,10 @@ async def update_status(user):
         return
 
 
+class UserId(BaseModel):
+    first_name: Optional[str] = None
+
+
 @user_router.get("/{user_id}")
 async def user_detail(user_id: int):
     user = await User.get(user_id)
@@ -105,8 +109,8 @@ async def user_get_friends(user_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@user_router.get("/friends/")
-async def user_get_friends(user_id: int):
+@user_router.get("/friends/{user_id}")
+async def user_get_friends(user_id: Annotated[UserId, Depends()]):
     user = await User.get(user_id)
     if user:
         friend = await friends_detail(user.id)
