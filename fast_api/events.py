@@ -87,8 +87,9 @@ async def event_from_user():
 @event_router.post('/claim/event/')
 async def event_from_user_delete(user_id: int, event_id: int):
     user = await User.get(user_id)
-    event = await UserAndEvent.get(event_id)
-    if user and event:
+    userevent = await UserAndEvent.get(event_id)
+    event = await Event.get(event_id)
+    if user and event or user and userevent:
         await User.update(user.id, coins=user.coins + 10000)
         return {"ok": True}
     else:
