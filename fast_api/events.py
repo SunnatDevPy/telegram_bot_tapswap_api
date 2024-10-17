@@ -73,7 +73,7 @@ async def event_from_user_event(user_id: int):
 
 @event_router.post('/all/user/')
 async def event_from_user():
-    events = await UserAndEvent.get_alls()
+    events = await Event.get_alls()
     users = await User.get_alls()
     if events:
         for user in users:
