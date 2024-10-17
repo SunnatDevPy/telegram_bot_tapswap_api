@@ -54,7 +54,7 @@ async def activate_user(user_id: int):
     if user:
         print(active_tasks)
         coin = await friends_coin(user_id)
-        if coin == 0:
+        if coin != 0:
             if user_id in active_tasks:
                 raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
             else:
