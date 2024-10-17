@@ -77,7 +77,7 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
         for j in randoms:
             await ParamQuestion.create(question_id=j.id, answer=False, user_id=message.from_user.id)
         if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
-            await message.answer(f"{xush} Admin {message.from_user.first_name}", reply_markup=None)
+            await message.answer(f"{xush} Admin {message.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
             await message.answer(bosh,
                                  reply_markup=main_menu(message.from_user.id, data.get('locale'), admin=True, ))
         else:
