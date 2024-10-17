@@ -60,7 +60,8 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                                  first_name=message.from_user.first_name,
                                  username=message.from_user.username, phone=str(message.contact.phone_number),
                                  coins=0,
-                                 is_admin=False, status_id=status[0].id, bonus=1, energy=200, max_energy=200, hour_coin=0)
+                                 is_admin=False, status_id=status[0].id, bonus=1, energy=200, max_energy=200,
+                                 hour_coin=0)
         if data.get("referred_id") and data.get("referred_user_id"):
             user = await User.get(data.get("referred_id"))
             await Referral.create(referrer_id=data.get("referred_id"),
