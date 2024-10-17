@@ -22,7 +22,7 @@ class RefferalList(BaseModel):
 
 @referral_router.post("/{user_id}")
 async def register_user(user_id: int):
-    return {"url": f"https://t.me/share/url?url=https://t.me/snkrsshoopbot?start={user_id}"}
+    return {"url": f"https://t.me/share/url?url=https://t.me/Stockfootball_bot?start={user_id}"}
 
 
 @referral_router.post("")
