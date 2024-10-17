@@ -1,7 +1,6 @@
 import asyncio
 import datetime
 from datetime import timedelta
-from time import sleep
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Depends

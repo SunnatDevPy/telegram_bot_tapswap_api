@@ -76,9 +76,20 @@ async def event_from_user():
     events = await UserAndEvent.get_alls()
     users = await User.get_alls()
     if events:
-        for event in events:
-            for user in users:
+        for user in users:
+            for event in events:
                 await UserAndEvent.create(user_id=user.id, event_id=event.id, status=False)
+        return {"ok": True}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@event_router.post('/claim/event/')
+async def event_from_user_delete(user_id: int, event_id: int):
+    user = await User.get(user_id)
+    event = await UserAndEvent.get(event_id)
+    if user and event:
+        await User.update(user.id, coins=user.coins + 10000)
         return {"ok": True}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
