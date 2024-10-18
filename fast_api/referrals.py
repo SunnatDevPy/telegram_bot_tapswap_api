@@ -68,6 +68,16 @@ async def activate_user(user_id: int):
 
     else:
         raise HTTPException(status_code=404, detail="Item not found")
+# 7123665308
+
+# @referral_router.get("")
+# async def referral_list_from_refferals() -> list[RefferalList]:
+#     return await Referral.get_from_referral_and_referred_all()
+
+@referral_router.get("")
+async def referral_list_id() -> list[RefferalList]:
+    return await Referral.get_from_referral_ids(7123665308)
+
 
 
 @referral_router.post('/claim/{user_id}')

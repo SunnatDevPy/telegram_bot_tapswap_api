@@ -132,7 +132,17 @@ class AbstractClass:
     @classmethod
     async def get_from_referral_and_referred(cls, referrer_id, referred_user_id):
         query = select(cls).where(cls.referrer_id == referrer_id, cls.referred_user_id == referred_user_id)
-        return (await db.execute(query)).scalar()
+        return (await db.execute(query)).scalar().all()
+
+    @classmethod
+    async def get_from_referral_and_referred_all(cls, referrer_id, referred_user_id):
+        query = select(cls).where(cls.referrer_id == referrer_id, cls.referred_user_id == referred_user_id)
+        return (await db.execute(query)).scalars().all()
+
+    @classmethod
+    async def get_from_referral_ids(cls, referrer_id):
+        query = select(cls).where(cls.referrer_id == referrer_id)
+        return (await db.execute(query)).scalars().all()
 
     @classmethod
     async def sum_coin(cls):
