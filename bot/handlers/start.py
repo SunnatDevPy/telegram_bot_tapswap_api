@@ -1,15 +1,13 @@
-import random
-
-from aiogram import Router, Bot, html
+from aiogram import Router, html
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from bot.buttuns.inline import main_menu, contact, language_inl
 from bot.state.states import Contact
-from config import BOT
-from db import User, Statusie, Questions, ParamQuestion
+from db import User, Statusie
 from db.models.model import Referral, Event, UserAndEvent
+from db.utils import update_question
 
 start_router = Router()
 
@@ -32,28 +30,26 @@ async def command_start(message: Message, state: FSMContext):
     if args:
         inviter_id = int(args)
         user = await User.get(inviter_id)
-        if user.id != message.from_user.id:
-            if await User.get(message.from_user.id):
-                await Referral.create(referrer_id=inviter_id, referred_user_id=message.from_user.id)
-                await User.update(inviter_id, coins=user.coins + 5000)
-            else:
-                await state.update_data(referred_id=inviter_id, referred_user_id=message.from_user.id)
+        referred = await Referral.get_from_referral_and_referred(inviter_id, message.from_user.id)
+        if user and referred is not None:
+            await Referral.create(referrer_id=inviter_id, referred_user_id=message.from_user.id)
+            await User.update(inviter_id, coins=user.coins + 5000)
+        else:
+            await state.update_data(referred_id=inviter_id, referred_user_id=message.from_user.id)
 
 
 @start_router.message(Contact.phone)
-async def command_start(message: Message, bot: Bot, state: FSMContext):
+async def command_start(message: Message, state: FSMContext):
     data = await state.get_data()
     lang_loc = data.get('locale')
     if lang_loc == "rus":
         xush = "Здравствуйте"
         bosh = "Главный меню"
         contact_message = "Пожалуйста, отправьте свой контакт"
-        start = "При регистрации возникла проблема.\nНажмите /start кнопку!"
     else:
         xush = "Assalomu aleykum"
         bosh = "Bosh menyu"
         contact_message = "Iltimos o'zingizni contactni yuboring"
-        start = "Ro'yxatdan o'tishda mu'ammo bo'ldi\nQayta /start tugmasini bosing!"
     status = await Statusie.get_alls()
     if message.contact and message.from_user.id == message.contact.user_id:
         user = await User.get(message.from_user.id)
@@ -73,32 +69,15 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                                      coins=0,
                                      is_admin=False, status_id=status[0].id, bonus=1, energy=200, max_energy=200,
                                      hour_coin=0)
-            if data.get("referred_id") and data.get("referred_user_id"):
-                user = await User.get(data.get("referred_id"))
-                await Referral.create(referrer_id=data.get("referred_id"),
-                                      referred_user_id=data.get("referred_user_id"))
-                await User.update(user.id, coins=user.coins + 5000)
+
             for i in await Event.get_alls():
                 await UserAndEvent.create(user_id=user.id, event_id=i.id, status=False)
-            questions = await Questions.get_alls()
-            if len(questions) >= 20:
-                randoms = random.sample(questions, 5)
-            else:
-                randoms = random.sample(questions, len(questions))
-            for j in randoms:
-                await ParamQuestion.create(question_id=j.id, answer=False, user_id=message.from_user.id)
-            if message.from_user.id in [1353080275, 5649321700] + [i for i in await User.get_admins()]:
-                await message.answer(f"{xush} Admin {message.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
-                await message.answer(bosh,
-                                     reply_markup=main_menu(message.from_user.id, data.get('locale'), admin=True, ))
-            else:
-                await message.answer(f"{xush} {message.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
-                await message.answer(bosh,
-                                     reply_markup=main_menu(message.from_user.id, data.get('locale')))
-            await bot.send_message(int(BOT.ADMIN),
-                                   f'Yangi user qo\'shildi @{message.from_user.username}!')
-            await bot.send_message(1353080275,
-                                   f'Yangi user qo\'shildi @{message.from_user.username}!')
+
+            await update_question(message.from_user.id)
+
+            await message.answer(f"{xush} {message.from_user.first_name}", reply_markup=ReplyKeyboardRemove())
+            await message.answer(bosh,
+                                 reply_markup=main_menu(message.from_user.id, data.get('locale')))
     else:
         await message.answer(html.bold(contact_message),
                              reply_markup=contact(), parse_mode="HTML")

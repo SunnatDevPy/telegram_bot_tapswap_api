@@ -111,7 +111,7 @@ class AbstractClass:
 
     @classmethod
     async def get_from_type(cls, type):
-        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins)).limit(10)
+        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins))
         return (await db.execute(query)).scalars().all()
 
     @classmethod
@@ -128,6 +128,11 @@ class AbstractClass:
     async def get_from_referral_id(cls, id_):
         query = select(cls).where(cls.referrer_id == id_)
         return (await db.execute(query)).scalars()
+
+    @classmethod
+    async def get_from_referral_and_referred(cls, referrer_id, referred_user_id):
+        query = select(cls).where(cls.referrer_id == referrer_id, cls.referred_user_id == referred_user_id)
+        return (await db.execute(query)).scalar()
 
     @classmethod
     async def sum_coin(cls):
