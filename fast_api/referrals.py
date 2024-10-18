@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 from datetime import timedelta
-from typing import Annotated
+from typing import Annotated, List
 
 import pytz
 from fastapi import APIRouter, HTTPException, Depends
@@ -15,6 +15,7 @@ referral_router = APIRouter(prefix='/referrals', tags=['Referral'])
 
 
 class RefferalList(BaseModel):
+    id: int
     referrer_id: int
     referred_user_id: int
     created_at: datetime.datetime
@@ -102,10 +103,36 @@ async def referral_delete(referral_id: int):
     return {"ok": True, 'id': referral_id}
 
 
-@referral_router.delete("/from_id/")
-async def referral_delete(referral_id: int):
-    await Referral.delete_from_referred(referral_id)
-    return {"ok": True, 'id': referral_id}
+async def remove_duplicates(people: List[RefferalList]) -> List[RefferalList]:
+    seen = set()
+    unique_people = []
+
+    for person in people:
+        identifier = (person.referrer_id, person.referred_user_id)
+        if identifier not in seen:
+            unique_people.append(person)
+            seen.add(identifier)
+        else:
+            await Referral.delete(person.id)
+    print(seen)
+    print(unique_people)
+
+    return unique_people
+
+
+@referral_router.get("/unique-people")
+async def get_unique_people():
+    refferals = await Referral.get_alls()
+    unique_people = await remove_duplicates(refferals)
+
+    return unique_people
+
+# Эндпоинт для получения списка людей и удаления дубликатов
+
+# @referral_router.delete("/from_id/")
+# async def referral_delete():
+#     await Referral.delete_from_referred(referral_id)
+#     return {"ok": True, 'id': referral_id}
 
 # {
 #     "referrer_id": 7123665308,
