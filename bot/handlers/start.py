@@ -32,7 +32,7 @@ async def command_start(message: Message, state: FSMContext):
     if args:
         inviter_id = int(args)
         user = await User.get(inviter_id)
-        if inviter_id != message.from_user.id:
+        if user.id != message.from_user.id:
             if await User.get(message.from_user.id):
                 await Referral.create(referrer_id=inviter_id, referred_user_id=message.from_user.id)
                 await User.update(inviter_id, coins=user.coins + 5000)
@@ -101,4 +101,4 @@ async def command_start(message: Message, bot: Bot, state: FSMContext):
                                    f'Yangi user qo\'shildi @{message.from_user.username}!')
     else:
         await message.answer(html.bold(contact_message),
-                             reply_markup=contact())
+                             reply_markup=contact(), parse_mode="HTML")

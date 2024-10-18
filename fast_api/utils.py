@@ -88,9 +88,13 @@ async def friends_coin(user_id):
 
 async def top_players_from_statu():
     list_ = []
+    coun = 1
     for i in await Statusie.get_alls():
+        if coun == 10:
+            break
         users = await User.get_from_type(i.id)
         list_.append({f"{i.name}": users})
+        coun += 1
     return list_
 
 
