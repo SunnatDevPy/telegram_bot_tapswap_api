@@ -68,6 +68,8 @@ async def activate_user(user_id: int):
 
     else:
         raise HTTPException(status_code=404, detail="Item not found")
+
+
 # 7123665308
 
 # @referral_router.get("")
@@ -77,7 +79,6 @@ async def activate_user(user_id: int):
 @referral_router.get("/from_id/")
 async def referral_list_id() -> list[RefferalList]:
     return await Referral.get_from_referral_ids(7123665308)
-
 
 
 @referral_router.post('/claim/{user_id}')
@@ -100,11 +101,11 @@ async def referral_delete(referral_id: int):
     await Referral.delete(referral_id)
     return {"ok": True, 'id': referral_id}
 
+
 @referral_router.delete("/from_id/")
 async def referral_delete(referral_id: int):
-    await Referral.delete(referral_id)
+    await Referral.delete_from_referred(referral_id)
     return {"ok": True, 'id': referral_id}
-
 
 # {
 #     "referrer_id": 7123665308,
@@ -112,8 +113,8 @@ async def referral_delete(referral_id: int):
 #     "created_at": "2024-10-17T17:42:42.206659"
 #   },
 
- # {
- #    "referrer_id": 7123665308,
- #    "referred_user_id": 1553215986,
- #    "created_at": "2024-10-17T18:23:48.347248"
- #  },
+# {
+#    "referrer_id": 7123665308,
+#    "referred_user_id": 1553215986,
+#    "created_at": "2024-10-17T18:23:48.347248"
+#  },
