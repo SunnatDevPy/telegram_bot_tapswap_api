@@ -176,6 +176,12 @@ class AbstractClass:
         await cls.commit()
 
     @classmethod
+    async def delete_from_referred(cls, id_):
+        query = sqlalchemy_delete(cls).where(cls.referrer_id == id_)
+        await db.execute(query)
+        await cls.commit()
+
+    @classmethod
     async def delete_experience(cls, id_):
         query = sqlalchemy_delete(cls).where(cls.user_id == id_)
         await db.execute(query)
