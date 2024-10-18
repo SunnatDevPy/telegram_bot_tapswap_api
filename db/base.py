@@ -111,7 +111,7 @@ class AbstractClass:
 
     @classmethod
     async def get_from_type(cls, type):
-        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins))
+        query = select(cls).where(cls.status_id == type).order_by(desc(cls.coins)).limit(10)
         return (await db.execute(query)).scalars().all()
 
     @classmethod
