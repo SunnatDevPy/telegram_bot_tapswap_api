@@ -31,7 +31,7 @@ async def command_start(message: Message, state: FSMContext):
         inviter_id = int(args)
         user = await User.get(inviter_id)
         referred = await Referral.get_from_referral_and_referred(inviter_id, message.from_user.id)
-        if user and referred is not None:
+        if referred is None:
             await Referral.create(referrer_id=inviter_id, referred_user_id=message.from_user.id)
             await User.update(inviter_id, coins=user.coins + 5000)
         else:
