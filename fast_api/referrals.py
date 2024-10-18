@@ -83,3 +83,9 @@ async def activate_user(user_id: int):
                     "firends_coin": coin * 8, "status": 'claim'}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
+
+
+@referral_router.delete("/")
+async def referral_delete(referral_id: int):
+    await Referral.delete(referral_id)
+    return {"ok": True, 'id': referral_id}
