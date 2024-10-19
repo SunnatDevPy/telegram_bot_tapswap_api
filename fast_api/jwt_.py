@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from icecream import icecream
 from jose import JWTError
 from jwt import InvalidTokenError
+from passlib.context import CryptContext
 from pydantic import BaseModel
 from starlette import status
 
@@ -19,6 +20,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 3600
 REFRESH_TOKEN_EXPIRE_DAYS = 100
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 jwt_router = APIRouter()
 
 credentials_exception = HTTPException(
@@ -88,7 +90,6 @@ async def protected_route(user_id: User = Depends(get_current_user)):
 @jwt_router.post("/token", response_model=Token)
 async def login_for_access_token(user_id: Annotated[UserId, Depends()]) -> Token:
     user = await User.get(user_id.user_id)
-
     if user:
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
         access_token = create_access_token(

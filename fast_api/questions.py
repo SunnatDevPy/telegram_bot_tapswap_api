@@ -1,6 +1,8 @@
 import random
+from datetime import datetime
 from typing import Annotated, Optional
 
+import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from fastapi import APIRouter, Depends, HTTPException
@@ -42,6 +44,7 @@ def schedule_jobs():
 schedule_jobs()
 
 questions_router = APIRouter(prefix='/questions', tags=['Questions'])
+
 
 
 class QuestionAdd(BaseModel):
@@ -107,6 +110,9 @@ async def question_answer_add(user_id: int, question_id: int, answer: str):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
+timezone = pytz.timezone('Asia/Tashkent')
+
+
 @questions_router.get('')
 async def questions_list() -> list[QuestionList]:
     users = await Questions.get_all()
@@ -123,7 +129,8 @@ async def param_questions_list() -> list[ParamQuestionList]:
 async def questions_from_user_list(user_id: int):
     users = await User.get(user_id)
     if users:
-        return await get_questions_from_user(user_id)
+        utc_now = datetime.utcnow()
+        return {"question": await get_questions_from_user(user_id), "start_time": utc_now.astimezone(timezone)}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -178,7 +185,7 @@ async def question_all_update(item: Annotated[ParamQuestionPatch, Depends()]):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-@questions_router.patch("/all/")
+@questions_router.patch("/alls/")
 async def question_all_param_update(item: Annotated[ParamQuestionList, Depends()]):
     question = await ParamQuestion.get_all()
     if question:

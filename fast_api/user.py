@@ -8,6 +8,8 @@ from pydantic import BaseModel
 
 from db import User, Statusie
 from db.models.model import UserAndExperience
+from fast_api.jwt_ import get_current_user
+from fast_api.referrals import times_user
 from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, top_players_from_statu_rank, \
     update_status
 
@@ -84,7 +86,7 @@ class UserId(BaseModel):
 
 
 @user_router.get("/{user_id}")
-async def user_detail(user_id: int):
+async def user_detail(user_id: Annotated[int, Depends(get_current_user)]):
     user = await User.get(user_id)
     if user:
         status = await Statusie.get(user.status_id)
@@ -117,9 +119,8 @@ async def user_get_friends(user_id: int):
     if user:
         friend = await friends_detail(user.id)
         utc_now = datetime.utcnow()
-        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1],
-                "start_time": utc_now.astimezone(timezone),
-                "end_time": utc_now.astimezone(timezone) + timedelta(seconds=28800)}
+        time = times_user[user_id]
+        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1], "date": time}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 

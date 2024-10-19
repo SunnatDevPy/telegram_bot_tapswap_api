@@ -41,6 +41,7 @@ async def referral_list() -> list[RefferalList]:
 
 
 active_tasks = {}
+times_user = {}
 
 
 async def claim_friends(user):
@@ -58,6 +59,8 @@ async def referral_activate_user(user_id: int):
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
         else:
             utc_now = datetime.datetime.utcnow()
+            times_user[user_id] = {'start_time': utc_now.astimezone(timezone),
+                                "end_time": utc_now.astimezone(timezone) + timedelta(seconds=28800)}
             task = asyncio.create_task(claim_friends(user))
             active_tasks[user_id] = task
             return {'ok': True, "start_time": utc_now.astimezone(timezone),
