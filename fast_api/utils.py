@@ -106,12 +106,13 @@ async def top_players_from_statu_rank(user_id, status):
 
 
 async def update_status(user):
-    status = await Statusie.get(user.status_id)
-    status_by_level = await Statusie.get_from_level(status.level + 1)
-    if status_by_level:
-        if user.coins >= status.limit_coin:
+    current_status = await Statusie.get(user.status_id)
+
+    next_status = await Statusie.get_from_level(current_status.level + 1)
+    if next_status:
+        if user.coins >= next_status.limit_coin:
             await User.update(user.id,
-                              status_id=status_by_level.id,
+                              status_id=next_status.id,
                               max_energy=user.max_energy + 200,
                               bonus=user.bonus + 1)
     else:
