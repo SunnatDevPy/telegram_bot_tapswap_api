@@ -87,7 +87,7 @@ class UserId(BaseModel):
 
 @user_router.get("/{user_id}")
 async def user_detail(user: int):
-    user = await User.get(user.id)
+    user = await User.get(user)
     if user:
         status = await Statusie.get(user.status_id)
         return {"status": status, "user": user, "rank": await top_players_from_statu_rank(user.id, status)}
