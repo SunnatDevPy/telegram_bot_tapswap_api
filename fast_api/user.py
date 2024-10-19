@@ -86,7 +86,7 @@ class UserId(BaseModel):
 
 
 @user_router.get("/{user_id}")
-async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
+async def user_detail(user: int):
     user = await User.get(user.id)
     if user:
         status = await Statusie.get(user.status_id)
