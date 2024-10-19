@@ -1,6 +1,8 @@
 import asyncio
+from datetime import timedelta, datetime
 from typing import Annotated, Optional
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -68,7 +70,7 @@ class UserPatch(BaseModel):
     username: Optional[str] = None
     phone: Optional[str] = None
     status_id: Optional[int] = None
-    coins: int
+    coins: Optional[int] = None
     bonus: Optional[int] = None
     energy: Optional[int] = 0
     max_energy: Optional[int] = None
@@ -106,12 +108,18 @@ async def user_get_friends(user_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
+timezone = pytz.timezone('Asia/Tashkent')
+
+
 @user_router.get("/friends/{user_id}")
 async def user_get_friends(user_id: int):
     user = await User.get(user_id)
     if user:
         friend = await friends_detail(user.id)
-        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1]}
+        utc_now = datetime.utcnow()
+        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1],
+                "start_time": utc_now.astimezone(timezone),
+                "end_time": utc_now.astimezone(timezone) + timedelta(seconds=28800)}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
