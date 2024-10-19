@@ -86,8 +86,8 @@ class UserId(BaseModel):
 
 
 @user_router.get("/{user_id}")
-async def user_detail(user_id: int):
-    user = await User.get(user_id)
+async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
+    user = await User.get(user.id)
     if user:
         status = await Statusie.get(user.status_id)
         return {"status": status, "user": user, "rank": await top_players_from_statu_rank(user.id, status)}
@@ -119,7 +119,7 @@ async def user_get_friends(user_id: int):
     if user:
         friend = await friends_detail(user.id)
         utc_now = datetime.utcnow()
-        time = times_user[user_id]
+        time = times_user.get(user_id)
         return {"user_data": user, "friends": friend[0], "friends_price": friend[-1], "date": time}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
