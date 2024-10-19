@@ -6,7 +6,8 @@ from pydantic import BaseModel
 
 from db import User, Statusie
 from db.models.model import UserAndExperience
-from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, top_players_from_statu_rank
+from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, top_players_from_statu_rank, \
+    update_status
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -45,14 +46,14 @@ async def user_add(user: Annotated[UserAdd, Depends()]):
     return {'ok': True, "id": user.id}
 
 
-@user_router.post("/actives/{active}")
-async def all_users_default(active: bool):
-    if active:
-        users = await User.get_alls()
-        for i in users:
-            await User.update(i.id, coins=0, energy=200, status_id=1)
-        return {'ok': True}
-    return {'ok': False}
+# @user_router.post("/actives/{active}")
+# async def all_users_default(active: bool):
+#     if active:
+#         users = await User.get_alls()
+#         for i in users:
+#             await User.update(i.id, coins=0, energy=200, status_id=1, max_energy=200)
+#         return {'ok': True}
+#     return {'ok': False}
 
 
 @user_router.get('')
@@ -74,19 +75,6 @@ class UserPatch(BaseModel):
 
 
 active_tasks = {}
-
-
-async def update_status(user):
-    status = await Statusie.get(user.status_id)
-    status_by_level = await Statusie.get_from_level(status.level + 1)
-    if status_by_level:
-        if user.coins >= status.limit_coin:  # Необходимо >=, чтобы учесть равенство
-            await User.update(user.id,
-                              status_id=status_by_level.id,
-                              max_energy=user.max_energy + 200,
-                              bonus=user.bonus + 1)
-    else:
-        return
 
 
 class UserId(BaseModel):
@@ -128,19 +116,24 @@ async def user_get_friends(user_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
+@user_router.get("/by/")
+async def get_by_username(username: str):
+    user = await User.get_user_by_username(username)
+    if user:
+        return {"user_data": user}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
 @user_router.get("/sum/")
 async def user_sum_coin():
     sum = await User.sum_coin()
-
     return {"sum coin": f"{int(sum):_}"}
 
 
 async def increase_energy(user_id, energy, max_energy):
     while max_energy != energy:
-        energy += 4
-        if energy > max_energy:
-            await User.update(user_id, energy=max_energy)
-            break
+        energy += 1
         await asyncio.sleep(3)
         await User.update(user_id, energy=energy)
 
@@ -159,6 +152,7 @@ async def user_patch_update(user_id: int, item: Annotated[UserPatch, Depends()])
                 await update_status(user)
                 task = asyncio.create_task(increase_energy(user.id, item.energy, user.max_energy))
                 active_tasks[user.id] = task
+
                 return {"ok": True, "data": update_data}
             else:
                 raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
@@ -179,6 +173,7 @@ async def user_coin_energy_update(coin: int, energy: int, user_id: int):
             await update_status(user)
             task = asyncio.create_task(increase_energy(user.id, energy, user.max_energy))
             active_tasks[user.id] = task
+
             return {"ok": True, "user": user}
         else:
             raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")

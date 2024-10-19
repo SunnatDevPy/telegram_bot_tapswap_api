@@ -9,7 +9,7 @@ from pydantic import BaseModel
 
 from db import User
 from db.models.model import Referral
-from fast_api.utils import friends_coin
+from fast_api.utils import friends_coin, update_status
 
 referral_router = APIRouter(prefix='/referrals', tags=['Referral'])
 
@@ -50,17 +50,14 @@ async def claim_friends(user):
 
 
 @referral_router.post('/activate/{user_id}')
-async def activate_user(user_id: int):
+async def referral_activate_user(user_id: int):
     user = await User.get(user_id)
     if user:
-        print(active_tasks)
         coin = await friends_coin(user_id)
-
         if user_id in active_tasks:
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
         else:
             utc_now = datetime.datetime.utcnow()
-            local_time = utc_now.astimezone(timezone)
             task = asyncio.create_task(claim_friends(user))
             active_tasks[user_id] = task
             return {'ok': True, "start_time": utc_now.astimezone(timezone),
@@ -71,26 +68,16 @@ async def activate_user(user_id: int):
         raise HTTPException(status_code=404, detail="Item not found")
 
 
-# 7123665308
-
-# @referral_router.get("")
-# async def referral_list_from_refferals() -> list[RefferalList]:
-#     return await Referral.get_from_referral_and_referred_all()
-
-@referral_router.get("/from_id/")
-async def referral_list_id() -> list[RefferalList]:
-    return await Referral.get_from_referral_ids(7123665308)
-
-
 @referral_router.post('/claim/{user_id}')
 async def activate_user(user_id: int):
     user = await User.get(user_id)
     if user:
         coin = await friends_coin(user_id)
+        await update_status(user)
         if user_id in active_tasks:
             raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
         else:
-            await User.update(user_id, coins=user.coins + coin)
+            await User.update(user_id, coins=user.coins + (coin * 8))
             return {'ok': True,
                     "firends_coin": coin * 8, "status": 'claim'}
     else:
@@ -114,8 +101,6 @@ async def remove_duplicates(people: List[RefferalList]) -> List[RefferalList]:
             seen.add(identifier)
         else:
             await Referral.delete(person.id)
-    print(seen)
-    print(unique_people)
 
     return unique_people
 
@@ -128,20 +113,3 @@ async def get_unique_people():
     return unique_people
 
 # Эндпоинт для получения списка людей и удаления дубликатов
-
-# @referral_router.delete("/from_id/")
-# async def referral_delete():
-#     await Referral.delete_from_referred(referral_id)
-#     return {"ok": True, 'id': referral_id}
-
-# {
-#     "referrer_id": 7123665308,
-#     "referred_user_id": 5763734083,
-#     "created_at": "2024-10-17T17:42:42.206659"
-#   },
-
-# {
-#    "referrer_id": 7123665308,
-#    "referred_user_id": 1553215986,
-#    "created_at": "2024-10-17T18:23:48.347248"
-#  },

@@ -12,7 +12,7 @@ from fast_api.auth_py import AuthBackend
 from fast_api.events import event_router
 from fast_api.experiences import experience
 from fast_api.jwt_ import jwt_router
-from fast_api.questions import scheduler, questions_router
+from fast_api.questions import questions_router
 from fast_api.referrals import referral_router
 from fast_api.statusiec import status_router
 from fast_api.user import user_router
@@ -36,12 +36,12 @@ app.add_middleware(SessionMiddleware, secret_key="stockminiapp")
 
 @app.on_event("startup")
 async def startup_event():
-    scheduler.start()
+    pass
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    scheduler.shutdown()
+    pass
 
 
 security = HTTPBasic()

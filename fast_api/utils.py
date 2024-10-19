@@ -103,3 +103,16 @@ async def top_players_from_statu_rank(user_id, status):
     for son, j in enumerate(users):
         if j.id == user_id:
             return {"status": status.name, "rank": son + 1}
+
+
+async def update_status(user):
+    status = await Statusie.get(user.status_id)
+    status_by_level = await Statusie.get_from_level(status.level + 1)
+    if status_by_level:
+        if user.coins >= status.limit_coin:
+            await User.update(user.id,
+                              status_id=status_by_level.id,
+                              max_energy=user.max_energy + 200,
+                              bonus=user.bonus + 1)
+    else:
+        return

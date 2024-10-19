@@ -13,26 +13,35 @@ from fast_api.utils import get_questions_from_user
 
 async def update_requests():
     questions = await Questions.get_all()
-    users = await User.get_alls()
-    for i in users:
+    users = await User.get_all()  # Fixed typo here
+
+    for user in users:
+        await ParamQuestion.delete_from_user_id(user.id)
         if len(questions) >= 5:
             randoms = random.sample(questions, 5)
         else:
             randoms = random.sample(questions, len(questions))
-        for j in randoms:
-            await ParamQuestion.create(question_id=j.id, answer=False, user_id=i.id)
+
+        for question in randoms:
+            await ParamQuestion.create(question_id=question.id, answer=False, user_id=user.id)
 
 
-async def delete_question():
-    users = await User.get_alls()
-    for i in users:
-        await ParamQuestion.delete_question(i.id)
+# Scheduler setup
+def schedule_jobs():
+    scheduler = AsyncIOScheduler()
 
+    # Wrapper to run async function in scheduler
+    async def job_wrapper():
+        await update_requests()
+
+    scheduler.add_job(job_wrapper, CronTrigger(hour=1, minute=0))
+    scheduler.start()
+
+
+# Start the scheduler when the app starts
+schedule_jobs()
 
 questions_router = APIRouter(prefix='/questions', tags=['Questions'])
-scheduler = AsyncIOScheduler()
-scheduler.add_job(delete_question, CronTrigger(hour=0, minute=0))
-scheduler.add_job(update_requests, CronTrigger(hour=2, minute=0))
 
 
 class QuestionAdd(BaseModel):
@@ -63,6 +72,12 @@ class ParamQuestionList(BaseModel):
     answer: bool
 
 
+class ParamQuestionPatch(BaseModel):
+    question_id: int
+    user_id: int
+    answer: bool
+
+
 @questions_router.post("")
 async def question_add(question_item: Annotated[QuestionAdd, Depends()]):
     question = await Questions.create(**question_item.dict())
@@ -71,15 +86,8 @@ async def question_add(question_item: Annotated[QuestionAdd, Depends()]):
 
 @questions_router.post("/{active}")
 async def question_add_all_user(active: bool):
-    if active == True:
+    if active:
         await update_requests()
-        return {'ok': True, "yes": "accsess"}
-
-
-@questions_router.post("/delete/param/{active}")
-async def question_add_delete_user(active: bool):
-    if active == True:
-        await delete_question()
         return {'ok': True, "yes": "accsess"}
 
 
@@ -156,8 +164,23 @@ async def question_patch(question_id: int, item: Annotated[QuestionPatch, Depend
 
 
 @questions_router.patch("/all/")
-async def question_all_update(item: Annotated[QuestionPatch, Depends()]):
-    question = await Questions.get_all()
+async def question_all_update(item: Annotated[ParamQuestionPatch, Depends()]):
+    question = await ParamQuestion.get_all()
+    if question:
+        update_data = {k: v for k, v in item.dict().items() if v is not None}
+        if update_data:
+            for i in question:
+                await ParamQuestion.update(i.id, **update_data)
+            return {"ok": True, "data": update_data}
+        else:
+            return {"ok": False, "message": "Nothing to update"}
+    else:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+
+@questions_router.patch("/all/")
+async def question_all_param_update(item: Annotated[ParamQuestionList, Depends()]):
+    question = await ParamQuestion.get_all()
     if question:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:

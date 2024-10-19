@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from db import User
 from db.models.model import Event, UserAndEvent
-from fast_api.utils import get_events
+from fast_api.utils import get_events, update_status
 
 event_router = APIRouter(prefix='/events', tags=['Events'])
 
@@ -31,19 +31,19 @@ class EventList(BaseModel):
 async def event_add(event: Annotated[EventAdd, Depends()]):
     event = await Event.create(**event.dict())
     users = await User.get_all()
-    print(event)
     for i in users:
         await UserAndEvent.create(user_id=i.id, event_id=event.id)
     return {'ok': True, "event": event.id}
 
 
 @event_router.post("/{user_id}")
-async def event_add(user_id: int, event_id: int):
+async def event_add_from_user(user_id: int, event_id: int):
     event = await Event.get(event_id)
     user = await User.get(user_id)
     if event and user:
         await UserAndEvent.update_event(user_id, event_id, status=True)
         await User.update(user_id, coins=user.coins + event.coin)
+        await update_status(user)
         return {'ok': True, "user": user, "ball": event.coin}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -61,7 +61,7 @@ async def event_from_user_list(user_id: int):
 
 
 @event_router.post('/change/{user_id}')
-async def event_from_user_event(user_id: int):
+async def event_change_from_user(user_id: int):
     events = await UserAndEvent.get_from_user_id(user_id)
     if events:
         for i in events:
@@ -72,7 +72,7 @@ async def event_from_user_event(user_id: int):
 
 
 @event_router.post('/all/user/')
-async def event_from_user():
+async def events_change_all_users():
     events = await Event.get_alls()
     users = await User.get_alls()
     if events:
@@ -85,11 +85,11 @@ async def event_from_user():
 
 
 @event_router.post('/delete/user/')
-async def event_from_user_delete():
+async def events_from_user_delete():
     users = await User.get_alls()
     if users:
         for user in users:
-            await UserAndEvent.delete_question(user.id)
+            await UserAndEvent.delete(user.id)
         return {"ok": True}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
@@ -108,7 +108,7 @@ class ParamEventPatch(BaseModel):
     user_id: Optional[int] = None
 
 
-@event_router.patch("/{event_id}", response_model=EventPatch)
+@event_router.patch("/{event_id}")
 async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
     event = await Event.get(event_id)
     if event:

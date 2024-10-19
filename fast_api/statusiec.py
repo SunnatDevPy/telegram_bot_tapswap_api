@@ -45,26 +45,16 @@ class StatusPatch(BaseModel):
     level: Optional[int] = None
 
 
-@status_router.patch("/{status_id}", response_model=StatusPatch)
+@status_router.patch("/{status_id}")
 async def status_patch(status_id: int, item: Annotated[StatusPatch, Depends()]):
     user = await Statusie.get(status_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
             await Statusie.update(status_id, **update_data)
-            return {"ok": True, "data": update_data}
+            return {"ok": True, "data": user}
         else:
             return {"ok": False, "message": "Nothing to update"}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-
-@status_router.put("/{status_id}", response_model=StatusPatch)
-async def status_put(status_id: int, items: StatusPatch):
-    status = await Statusie.get(status_id)
-    if status:
-        await Statusie.update(status.id, **items.dict())
-        return {"ok": True, "data": items}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
