@@ -322,7 +322,7 @@ async def leagues_handler(call: CallbackQuery, bot: Bot, state: FSMContext):
         bosh = "Главный меню"
         liga = "Лиги"
     else:
-        bosh = 'Bosh mneyu'
+        bosh = 'Bosh menyu'
         davlat = "Davlatlar"
         liga = 'Ligalar'
     data = call.data.split('_')
