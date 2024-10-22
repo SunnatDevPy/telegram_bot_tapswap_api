@@ -66,14 +66,14 @@ async def referral_activate_user(user: Annotated[UserId, Depends(get_current_use
         utc_now = datetime.datetime.utcnow()
         tashkent_now = utc_now.replace(tzinfo=pytz.utc).astimezone(timezone)  # Convert UTC to Tashkent timezone
         times_user[user.id] = {"start_time": tashkent_now,
-                               "end_time": tashkent_now + timedelta(seconds=10)}
+                               "end_time": tashkent_now + timedelta(seconds=28800)}
         task = asyncio.create_task(claim_friends(user))
         active_tasks[user.id] = task
 
         return {
             'ok': True,
             "start_time": tashkent_now,
-            "end_time": tashkent_now + timedelta(seconds=10),
+            "end_time": tashkent_now + timedelta(seconds=28800),
             "firends_coin": coin * 8
         }
 

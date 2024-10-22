@@ -89,7 +89,7 @@ async def events_change_all_users():
 
 
 @event_router.post('/delete/user/')
-async def events_from_user_delete(user: Annotated[UserId, Depends(get_current_user)]):
+async def events_from_user_delete():
     users = await User.get_alls()
     if users:
         for user in users:
