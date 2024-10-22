@@ -93,7 +93,7 @@ async def events_from_user_delete():
     users = await User.get_alls()
     if users:
         for user in users:
-            await UserAndEvent.delete(user.id)
+            await UserAndEvent.delete_from_user_id(user.id)
         return {"ok": True}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
