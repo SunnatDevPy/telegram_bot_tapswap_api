@@ -119,7 +119,7 @@ class ParamEventList(BaseModel):
     user_id: Optional[int] = None
 
 
-@event_router.get('')
+@event_router.get('/param/list/')
 async def param_event_list() -> list[ParamEventList]:
     events = await UserAndEvent.get_alls()
     return events
