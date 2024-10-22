@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -108,6 +108,13 @@ class ParamEventPatch(BaseModel):
     user_id: Optional[int] = None
 
 
+class ParamEventList(BaseModel):
+    id: Optional[int] = None
+    event_id: Optional[int] = None
+    status: Optional[str] = None
+    user_id: Optional[int] = None
+
+
 @event_router.patch("/{event_id}")
 async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
     event = await Event.get(event_id)
@@ -135,6 +142,27 @@ async def events_all_update(item: Annotated[EventPatch, Depends()]):
             return {"ok": False, "message": "Nothing to update"}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
+
+
+async def remove_duplicates_events(people: List[ParamEventList]) -> List[ParamEventList]:
+    seen = set()
+    unique_people = []
+
+    for person in people:
+        identifier = (person.event_id, person.user_id)
+        if identifier not in seen:
+            unique_people.append(person)
+            seen.add(identifier)
+        else:
+            await UserAndEvent.delete(person.id)
+
+    return unique_people
+
+@event_router.get("/unique-event")
+async def get_unique_event():
+    user_events = await UserAndEvent.get_alls()
+    unique_people = await remove_duplicates_events(user_events)
+    return unique_people
 
 
 @event_router.delete("/{event_id}")
