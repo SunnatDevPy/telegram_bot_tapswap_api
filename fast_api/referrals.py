@@ -1,14 +1,17 @@
 import asyncio
 import datetime
 from datetime import timedelta
-from typing import Annotated, List
+from typing import Annotated
+from typing import List, Optional
 
 import pytz
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter
+from fastapi import HTTPException, Depends
 from pydantic import BaseModel
 
 from db import User
 from db.models.model import Referral
+from fast_api.jwt_ import get_current_user
 from fast_api.utils import friends_coin, update_status
 
 referral_router = APIRouter(prefix='/referrals', tags=['Referral'])
@@ -21,16 +24,17 @@ class RefferalList(BaseModel):
     created_at: datetime.datetime
 
 
-timezone = pytz.timezone('Asia/Tashkent')
+class UserId(BaseModel):
+    id: Optional[int] = None
 
 
-@referral_router.post("/{user_id}")
-async def register_user(user_id: int):
-    return {"url": f"https://t.me/share/url?url=https://t.me/Stockfootball_bot?start={user_id}"}
+@referral_router.post("/")
+async def register_user(user: Annotated[UserId, Depends(get_current_user)]):
+    return {"url": f"https://t.me/share/url?url=https://t.me/Stockfootball_bot?start={user.id}"}
 
 
 @referral_router.post("")
-async def referral_add(user: Annotated[RefferalList, Depends()]):
+async def referral_add(user: Annotated[RefferalList, Depends()], users: Annotated[UserId, Depends(get_current_user)]):
     user = await Referral.create(**user.dict())
     return {'ok': True, "id": user.id}
 
@@ -45,46 +49,47 @@ times_user = {}
 
 
 async def claim_friends(user):
-    await asyncio.sleep(28800)
+    await asyncio.sleep(10)
     if user.id in active_tasks:
         del active_tasks[user.id]
 
 
-@referral_router.post('/activate/{user_id}')
-async def referral_activate_user(user_id: int):
-    user = await User.get(user_id)
-    if user:
-        coin = await friends_coin(user_id)
-        if user_id in active_tasks:
-            raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
-        else:
-            utc_now = datetime.datetime.utcnow()
-            times_user[user_id] = {'start_time': utc_now.astimezone(timezone),
-                                "end_time": utc_now.astimezone(timezone) + timedelta(seconds=28800)}
-            task = asyncio.create_task(claim_friends(user))
-            active_tasks[user_id] = task
-            return {'ok': True, "start_time": utc_now.astimezone(timezone),
-                    "end_time": utc_now.astimezone(timezone) + timedelta(seconds=28800),
-                    "firends_coin": coin * 8}
+timezone = pytz.timezone('Asia/Tashkent')
 
+
+@referral_router.post('/activate/')
+async def referral_activate_user(user: Annotated[UserId, Depends(get_current_user)]):
+    coin = await friends_coin(user.id)
+    if user.id in active_tasks:
+        raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
     else:
-        raise HTTPException(status_code=404, detail="Item not found")
+        utc_now = datetime.datetime.utcnow()
+        tashkent_now = utc_now.replace(tzinfo=pytz.utc).astimezone(timezone)  # Convert UTC to Tashkent timezone
+        times_user[user.id] = {"start_time": tashkent_now,
+                               "end_time": tashkent_now + timedelta(seconds=10)}
+        task = asyncio.create_task(claim_friends(user))
+        active_tasks[user.id] = task
+
+        return {
+            'ok': True,
+            "start_time": tashkent_now,
+            "end_time": tashkent_now + timedelta(seconds=10),
+            "firends_coin": coin * 8
+        }
 
 
-@referral_router.post('/claim/{user_id}')
-async def activate_user(user_id: int):
-    user = await User.get(user_id)
-    if user:
-        coin = await friends_coin(user_id)
-        await update_status(user)
-        if user_id in active_tasks:
-            raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
-        else:
-            await User.update(user_id, coins=user.coins + (coin * 8))
-            return {'ok': True,
-                    "firends_coin": coin * 8, "status": 'claim'}
+@referral_router.post('/claim/')
+async def activate_user(user: Annotated[UserId, Depends(get_current_user)]):
+    coin = await friends_coin(user.id)
+    await update_status(user)
+    if user.id in active_tasks:
+        raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
     else:
-        raise HTTPException(status_code=404, detail="Item not found")
+        if user.id in times_user:
+            del times_user[user.id]
+        await User.update(user.id, coins=user.coins + (coin * 8))
+        return {'ok': True,
+                "firends_coin": coin * 8, "time": times_user.get(user.id), 'status': "claim"}
 
 
 @referral_router.delete("/")

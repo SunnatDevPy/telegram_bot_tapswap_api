@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from db import User
 from db.models.model import Event, UserAndEvent
+from fast_api.jwt_ import get_current_user
 from fast_api.utils import get_events, update_status
 
 event_router = APIRouter(prefix='/events', tags=['Events'])
@@ -27,6 +28,10 @@ class EventList(BaseModel):
     photo: str
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 @event_router.post("")
 async def event_add(event: Annotated[EventAdd, Depends()]):
     event = await Event.create(**event.dict())
@@ -36,13 +41,12 @@ async def event_add(event: Annotated[EventAdd, Depends()]):
     return {'ok': True, "event": event.id}
 
 
-@event_router.post("/{user_id}")
-async def event_add_from_user(user_id: int, event_id: int):
+@event_router.post("/")
+async def event_active_from_user(event_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     event = await Event.get(event_id)
-    user = await User.get(user_id)
     if event and user:
-        await UserAndEvent.update_event(user_id, event_id, status=True)
-        await User.update(user_id, coins=user.coins + event.coin)
+        await UserAndEvent.update_event(user.id, event_id, status=True)
+        await User.update(user.id, coins=user.coins + event.coin)
         await update_status(user)
         return {'ok': True, "user": user, "ball": event.coin}
     else:
@@ -55,18 +59,18 @@ async def event_list() -> list[EventList]:
     return events
 
 
-@event_router.get('/{user_id}')
-async def event_from_user_list(user_id: int):
-    return await get_events(user_id)
+@event_router.get('/list/')
+async def event_from_user_list(user: Annotated[UserId, Depends(get_current_user)]):
+    return await get_events(user.id)
 
 
 @event_router.post('/change/{user_id}')
-async def event_change_from_user(user_id: int):
-    events = await UserAndEvent.get_from_user_id(user_id)
+async def event_change_from_user(user: Annotated[UserId, Depends(get_current_user)]):
+    events = await UserAndEvent.get_from_user_id(user.user_id)
     if events:
         for i in events:
             await UserAndEvent.update(i.id, status=False)
-        return await get_events(user_id)
+        return await get_events(user.user_id)
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -85,7 +89,7 @@ async def events_change_all_users():
 
 
 @event_router.post('/delete/user/')
-async def events_from_user_delete():
+async def events_from_user_delete(user: Annotated[UserId, Depends(get_current_user)]):
     users = await User.get_alls()
     if users:
         for user in users:
@@ -115,6 +119,12 @@ class ParamEventList(BaseModel):
     user_id: Optional[int] = None
 
 
+@event_router.get('')
+async def param_event_list() -> list[ParamEventList]:
+    events = await UserAndEvent.get_alls()
+    return events
+
+
 @event_router.patch("/{event_id}")
 async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
     event = await Event.get(event_id)
@@ -130,7 +140,7 @@ async def event_patch(event_id: int, item: Annotated[EventPatch, Depends()]):
 
 
 @event_router.patch("/all/")
-async def events_all_update(item: Annotated[EventPatch, Depends()]):
+async def events_all_update(item: Annotated[EventPatch, Depends()], user: Annotated[UserId, Depends(get_current_user)]):
     question = await Event.get_all()
     if question:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -158,14 +168,14 @@ async def remove_duplicates_events(people: List[ParamEventList]) -> List[ParamEv
 
     return unique_people
 
+
 @event_router.get("/unique-event")
 async def get_unique_event():
     user_events = await UserAndEvent.get_alls()
     unique_people = await remove_duplicates_events(user_events)
     return unique_people
 
-
-@event_router.delete("/{event_id}")
-async def event_delete(event_id: int):
-    await Event.delete(event_id)
-    return {"ok": True, 'id': event_id}
+# @event_router.delete("/{event_id}")
+# async def event_delete(event_id: int):
+#     await Event.delete(event_id)
+#     return {"ok": True, 'id': event_id}

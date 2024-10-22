@@ -15,7 +15,7 @@ from fast_api.jwt_ import jwt_router
 from fast_api.questions import questions_router
 from fast_api.referrals import referral_router
 from fast_api.statusiec import status_router
-from fast_api.user import user_router
+from fast_api.user_exam import user_router
 
 
 @asynccontextmanager

@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from db import User
 from db.models.model import Questions, ParamQuestion
+from fast_api.jwt_ import get_current_user
 from fast_api.utils import get_questions_from_user
 
 
@@ -28,6 +29,10 @@ async def update_requests():
             await ParamQuestion.create(question_id=question.id, answer=False, user_id=user.id)
 
 
+class UserId(BaseModel):
+    id: Optional[int] = None
+
+
 # Scheduler setup
 def schedule_jobs():
     scheduler = AsyncIOScheduler()
@@ -44,7 +49,6 @@ def schedule_jobs():
 schedule_jobs()
 
 questions_router = APIRouter(prefix='/questions', tags=['Questions'])
-
 
 
 class QuestionAdd(BaseModel):
@@ -82,27 +86,27 @@ class ParamQuestionPatch(BaseModel):
 
 
 @questions_router.post("")
-async def question_add(question_item: Annotated[QuestionAdd, Depends()]):
+async def question_add(question_item: Annotated[QuestionAdd, Depends()],
+                       user: Annotated[UserId, Depends(get_current_user)]):
     question = await Questions.create(**question_item.dict())
     return {'ok': True, "id": question.id}
 
 
 @questions_router.post("/{active}")
-async def question_add_all_user(active: bool):
+async def question_add_all_user(active: bool, user: Annotated[UserId, Depends(get_current_user)]):
     if active:
         await update_requests()
         return {'ok': True, "yes": "accsess"}
 
 
 @questions_router.post("/answer/")
-async def question_answer_add(user_id: int, question_id: int, answer: str):
-    question = await ParamQuestion.get_question_from_user(user_id, question_id)
-    user = await User.get(user_id)
+async def question_answer_add(user: Annotated[UserId, Depends(get_current_user)], question_id: int, answer: str):
+    question = await ParamQuestion.get_question_from_user(user.id, question_id)
     if question and user:
         quest = await Questions.get(question.question_id)
         if quest.answer == answer:
-            await User.update(user_id, coins=user.coins + quest.ball)
-            await ParamQuestion.update_question(user_id, question_id, answer=True)
+            await User.update(user.id, coins=user.coins + quest.ball)
+            await ParamQuestion.update_question(user.id, question_id, answer=True)
             return {"answer": True, 'ball': quest.ball}
         else:
             return {"answer": False}
@@ -125,14 +129,10 @@ async def param_questions_list() -> list[ParamQuestionList]:
     return users
 
 
-@questions_router.get('/{user_id}')
-async def questions_from_user_list(user_id: int):
-    users = await User.get(user_id)
-    if users:
-        utc_now = datetime.utcnow()
-        return {"question": await get_questions_from_user(user_id), "start_time": utc_now.astimezone(timezone)}
-    else:
-        raise HTTPException(status_code=404, detail="Item not found")
+@questions_router.get('/')
+async def questions_from_user_list(user: Annotated[UserId, Depends(get_current_user)]):
+    utc_now = datetime.utcnow()
+    return {"question": await get_questions_from_user(user.id), "start_time": utc_now.astimezone(timezone)}
 
 
 class QuestionPatch(BaseModel):
@@ -157,7 +157,7 @@ async def question_detail(question_id: int):
 
 # coin energy update
 @questions_router.patch("/{question_id}")
-async def question_patch(question_id: int, item: Annotated[QuestionPatch, Depends()]):
+async def question_patch(question_id: int, item: Annotated[QuestionPatch, Depends()], user: Annotated[UserId, Depends(get_current_user)]):
     question = await Questions.get(question_id)
     if question:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -171,7 +171,7 @@ async def question_patch(question_id: int, item: Annotated[QuestionPatch, Depend
 
 
 @questions_router.patch("/all/")
-async def question_all_update(item: Annotated[ParamQuestionPatch, Depends()]):
+async def question_all_update(item: Annotated[ParamQuestionPatch, Depends()], user: Annotated[UserId, Depends(get_current_user)]):
     question = await ParamQuestion.get_all()
     if question:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -186,7 +186,7 @@ async def question_all_update(item: Annotated[ParamQuestionPatch, Depends()]):
 
 
 @questions_router.patch("/alls/")
-async def question_all_param_update(item: Annotated[ParamQuestionList, Depends()]):
+async def question_all_param_update(item: Annotated[ParamQuestionList, Depends()], user: Annotated[UserId, Depends(get_current_user)]):
     question = await ParamQuestion.get_all()
     if question:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -201,6 +201,6 @@ async def question_all_param_update(item: Annotated[ParamQuestionList, Depends()
 
 
 @questions_router.delete("/{question_id}")
-async def question_delete(question_id: int):
+async def question_delete(question_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     await Questions.delete(question_id)
     return {"ok": True, 'id': question_id}

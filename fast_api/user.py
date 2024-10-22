@@ -85,9 +85,11 @@ class UserId(BaseModel):
     id: Optional[int] = None
 
 
-@user_router.get("/{user_id}")
-async def user_detail(user_id: int):
-    user = await User.get(user_id)
+# Annotated[UserId, Depends(get_current_user)]
+
+@user_router.get("/")
+async def user_detail(user: Annotated[UserId, Depends(get_current_user)]):
+    user = await User.get(user.id)
     if user:
         status = await Statusie.get(user.status_id)
         return {"status": status, "user": user, "rank": await top_players_from_statu_rank(user.id, status)}
@@ -113,7 +115,7 @@ async def user_get_friends(user_id: int):
 timezone = pytz.timezone('Asia/Tashkent')
 
 
-@user_router.get("/friends/{user_id}")
+@user_router.get("/friends/")
 async def user_get_friends(user_id: int):
     user = await User.get(user_id)
     if user:

@@ -17,7 +17,7 @@ from db import User
 
 SECRET_KEY = "selectstalker"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 3600
+ACCESS_TOKEN_EXPIRE_MINUTES = 480
 REFRESH_TOKEN_EXPIRE_DAYS = 100
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -29,11 +29,21 @@ credentials_exception = HTTPException(
     headers={"WWW-Authenticate": "Bearer"}, )
 
 
-def create_refresh_token(user_id: int):
-    expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode = {"user_id": user_id, "exp": expire}
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+async def refresh_access_token(refresh_token: str):
+    try:
+        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        if 'exp' in payload and datetime.utcnow() > datetime.utcfromtimestamp(payload['exp']):
+            raise HTTPException(status_code=401, detail="Refresh token expired")
+        user_id = payload.get("sub")
+        if user_id is None:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        new_access_token = create_access_token(data={"sub": user_id})
+        return {"access_token": new_access_token, "token_type": "bearer"}
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token expired")
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -111,7 +121,7 @@ def refresh_access_token(refresh_token: str):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
-    new_access_token = create_access_token(
+    new_access_token = refresh_access_token(
         data={"user_id": str(user_id)},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     return {"access_token": new_access_token, "token_type": "bearer"}

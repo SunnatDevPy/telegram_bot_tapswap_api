@@ -8,6 +8,7 @@ async def get_events(user_id):
     for i in events:
         event: Event = await Event.get(i.event_id)
         list_.append({
+            "id": i.id,
             "event_id": event.id,
             "user_id": i.user_id,
             "status": i.status,
@@ -45,7 +46,7 @@ async def get_detail_experience(data):
 
 async def get_questions_from_user(user_id):
     list_ = []
-    questions = await ParamQuestion.get_from_user_id(user_id)
+    questions = await ParamQuestion.get_from_user_id_question(user_id)
     for i in questions:
         quest = await Questions.get(i.question_id)
         list_.append(

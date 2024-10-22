@@ -4,8 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from db import Statusie
+from fast_api.jwt_ import get_current_user
 
 status_router = APIRouter(prefix='/status', tags=['Status'])
+
+
+class UserId(BaseModel):
+    id: Optional[int] = None
 
 
 class StatusAdd(BaseModel):
@@ -22,7 +27,7 @@ class StatusList(BaseModel):
 
 
 @status_router.post("")
-async def status_add(status: Annotated[StatusAdd, Depends()]):
+async def status_add(status: Annotated[StatusAdd, Depends()], user: Annotated[UserId, Depends(get_current_user)]):
     status = await Statusie.create(**status.dict())
     return {'ok': True, "id": status.id}
 
@@ -46,7 +51,8 @@ class StatusPatch(BaseModel):
 
 
 @status_router.patch("/{status_id}")
-async def status_patch(status_id: int, item: Annotated[StatusPatch, Depends()]):
+async def status_patch(status_id: int, item: Annotated[StatusPatch, Depends()],
+                       user: Annotated[UserId, Depends(get_current_user)]):
     user = await Statusie.get(status_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
@@ -60,6 +66,6 @@ async def status_patch(status_id: int, item: Annotated[StatusPatch, Depends()]):
 
 
 @status_router.delete("/{status_id}")
-async def status_delete(status_id: int):
+async def status_delete(status_id: int, user: Annotated[UserId, Depends(get_current_user)]):
     await Statusie.delete(status_id)
     return {"ok": True, 'id': status_id}
