@@ -103,7 +103,12 @@ class AbstractClass:
     @classmethod
     async def get_from_referral_id(cls, id_):
         query = select(cls).where(cls.referrer_id == id_)
-        return (await db.execute(query)).scalars()
+        return (await db.execute(query)).scalars().all()
+
+    @classmethod
+    async def get_from_referred_user_id(cls, id_):
+        query = select(cls).where(cls.referred_user_id == id_)
+        return (await db.execute(query)).scalars().all()
 
     @classmethod
     async def get_from_referral_and_referred(cls, referrer_id, referred_user_id):

@@ -21,7 +21,7 @@ class RefferalList(BaseModel):
     id: int
     referrer_id: int
     referred_user_id: int
-    created_at: datetime.datetime
+    hour_coin: int
 
 
 class UserId(BaseModel):
@@ -49,9 +49,11 @@ times_user = {}
 
 
 async def claim_friends(user):
-    await asyncio.sleep(10)
+    await asyncio.sleep(28800)
     if user.id in active_tasks:
         del active_tasks[user.id]
+        for i in await Referral.get_from_referral_id(user.id):
+            await Referral.update(i.id, is_active=False)
 
 
 timezone = pytz.timezone('Asia/Tashkent')
@@ -59,22 +61,21 @@ timezone = pytz.timezone('Asia/Tashkent')
 
 @referral_router.post('/activate/')
 async def referral_activate_user(user: Annotated[UserId, Depends(get_current_user)]):
-    coin = await friends_coin(user.id)
     if user.id in active_tasks:
         raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
     else:
         utc_now = datetime.datetime.utcnow()
-        tashkent_now = utc_now.replace(tzinfo=pytz.utc).astimezone(timezone)  # Convert UTC to Tashkent timezone
+        tashkent_now = utc_now.replace(tzinfo=pytz.utc).astimezone(timezone)
         times_user[user.id] = {"start_time": tashkent_now,
                                "end_time": tashkent_now + timedelta(seconds=28800)}
         task = asyncio.create_task(claim_friends(user))
         active_tasks[user.id] = task
-
+        for i in await Referral.get_from_referral_id(user.id):
+            await Referral.update(i.id, is_active=True, hour_8_coin=0)
         return {
             'ok': True,
             "start_time": tashkent_now,
-            "end_time": tashkent_now + timedelta(seconds=28800),
-            "firends_coin": coin * 8
+            "end_time": tashkent_now + timedelta(seconds=28800)
         }
 
 
@@ -85,11 +86,15 @@ async def activate_user(user: Annotated[UserId, Depends(get_current_user)]):
     if user.id in active_tasks:
         raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
     else:
+        for i in await Referral.get_from_referral_id(user.id):
+            await Referral.update(i.id, is_active=False, hour_8_coin=0)
+
         if user.id in times_user:
             del times_user[user.id]
-        await User.update(user.id, coins=user.coins + (coin * 8))
+
+        await User.update(user.id, coins=user.coins + coin, hour_coin=0)
         return {'ok': True,
-                "firends_coin": coin * 8, "time": times_user.get(user.id), 'status': "claim"}
+                "firends_coin": coin, "time": times_user.get(user.id), 'status': "claim"}
 
 
 @referral_router.delete("/")
@@ -111,6 +116,34 @@ async def remove_duplicates(people: List[RefferalList]) -> List[RefferalList]:
             await Referral.delete(person.id)
 
     return unique_people
+
+
+# @referral_router.post("/add-coins/{referrer_id}")
+# def add_coins_to_friends(referrer_id: int):
+#     # Находим всех друзей, которых пригласил пользователь с referrer_id
+#     referrals = db.query(Referral).filter(Referral.referrer_id == referrer_id).all()
+#
+#     if not referrals:
+#         raise HTTPException(status_code=404, detail="No referrals found.")
+#
+#     # Добавляем указанное количество очков каждому другу
+#     for referral in referrals:
+#         referral.hour_8_coin += request.coins
+#
+#     db.commit()  # Сохраняем изменения в базе данных
+#
+#     return {"message": f"{request.coins} coins added to all referred users."}
+
+
+# @app.get("/referral/points/{referrer_id}")
+# def get_referral_points(referrer_id: int, db: Session = Depends(get_db)):
+#     referrals = db.query(Referral).filter(Referral.referrer_id == referrer_id).all()
+#
+#     if not referrals:
+#         raise HTTPException(status_code=404, detail="No referrals found.")
+#
+#     total_points = sum(referral.hour_8_coin for referral in referrals)
+#     return {"total_points": total_points}
 
 
 @referral_router.get("/unique-people")

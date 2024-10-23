@@ -1,7 +1,8 @@
+from datetime import datetime, timedelta
 from typing import List
 
 from sqlalchemy import BIGINT, BigInteger, String, ForeignKey, TEXT, Integer, Boolean, select, \
-    update as sqlalchemy_update, delete as sqlalchemy_delete, func
+    update as sqlalchemy_update, delete as sqlalchemy_delete, func, DateTime
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.base import CreateModel, db
@@ -145,6 +146,8 @@ class Referral(CreateModel):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     referrer_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete="CASCADE"), index=True)
     referred_user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey('users.id', ondelete="CASCADE"))
+    hour_8_coin: Mapped[int] = mapped_column(BigInteger, default=0)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
     @classmethod
     async def delete_from_referred(cls, id_):

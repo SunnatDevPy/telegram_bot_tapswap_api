@@ -73,18 +73,20 @@ async def friends_detail(user_id):
     for i in await Referral.get_from_referral_id(user_id):
         user: User = await User.get(i.referred_user_id)
         status: Statusie = await Statusie.get(user.status_id)
-        list_.append({"user_id": user.id, "status": status.name, "coins": user.coins, "username": user.username,
-                      "benefit": int((user.coins * 1.5) / 100)})
-        friends_price += int((user.coins * 1.5) / 100)
-    return list_, friends_price
+        list_.append({"user_id": user.id, "status": status.name, "coins": user.coins, "username": user.username})
+        if i.is_active:
+            friends_price += i.hour_8_coin
+    if friends_price != 0:
+        await User.update(user_id, hour_coin=friends_price)
+    return list_
 
 
 async def friends_coin(user_id):
     friends_price = 0
     for i in await Referral.get_from_referral_id(user_id):
-        user: User = await User.get(i.referred_user_id)
-        friends_price += int((user.coins * 1.5) / 100)
-    return friends_price
+        friends_price += i.hour_8_coin
+    print(friends_price)
+    return int((friends_price * 1.5) / 100)
 
 
 async def top_players_from_statu():
@@ -118,3 +120,20 @@ async def update_status(user):
                               bonus=user.bonus + 1)
     else:
         return
+
+
+async def friends_sum(user):
+    referred_user = await Referral.get_from_referred_user_id(user.id)
+    total = 0
+    for i in referred_user:
+        if i.is_active:
+            total += i.hour_8_coin
+    return total
+
+
+async def friends_update_coin(user, coin):
+    print(coin)
+    referred_user = await Referral.get_from_referred_user_id(user.id)
+    for i in referred_user:
+        if i.is_active:
+            await Referral.update(i.id, hour_8_coin=i.hour_8_coin + coin)

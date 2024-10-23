@@ -48,7 +48,7 @@ security = HTTPBasic()
 # football-stock.uz
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8489", "https://football-stock.uz"],
+    allow_origins=["http://localhost:8489", "https://football-stock.uz", "http://192.168.100.155:8489"],
     # allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],

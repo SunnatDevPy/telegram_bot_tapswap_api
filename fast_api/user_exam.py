@@ -1,5 +1,5 @@
 import asyncio
-from datetime import timedelta, datetime
+from datetime import datetime
 from typing import Annotated, Optional
 
 import pytz
@@ -11,7 +11,7 @@ from db.models.model import UserAndExperience
 from fast_api.jwt_ import get_current_user
 from fast_api.referrals import times_user
 from fast_api.utils import get_detail_experience, top_players_from_statu, friends_detail, top_players_from_statu_rank, \
-    update_status
+    update_status, friends_update_coin
 
 user_router = APIRouter(prefix='/users', tags=['User'])
 
@@ -79,6 +79,7 @@ class UserPatch(BaseModel):
 
 
 active_tasks = {}
+users_coins = {}
 
 
 class UserId(BaseModel):
@@ -116,9 +117,8 @@ async def user_get_friends(user: Annotated[UserId, Depends(get_current_user)]):
     user = await User.get(user.id)
     if user:
         friend = await friends_detail(user.id)
-        utc_now = datetime.utcnow()
         time = times_user.get(user.id)
-        return {"user_data": user, "friends": friend[0], "friends_price": friend[-1], "date": time}
+        return {"user_data": user, "friends": friend, "friends_price": int((user.hour_coin * 1.5) / 100), "date": time}
     else:
         raise HTTPException(status_code=404, detail="Item not found")
 
@@ -158,13 +158,14 @@ async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], 
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
             if update_data['coins'] > 0:
+                old_coin = item.coins - user.coins
                 await User.update(user.id, **update_data)
                 if user.id in active_tasks:
                     active_tasks[user.id].cancel()
                 await update_status(user)
                 task = asyncio.create_task(increase_energy(user.id, item.energy, user.max_energy))
                 active_tasks[user.id] = task
-
+                await friends_update_coin(user, old_coin)
                 return {"ok": True, "data": update_data}
             else:
                 raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
@@ -176,16 +177,17 @@ async def user_patch_update(user: Annotated[UserId, Depends(get_current_user)], 
 
 @user_router.patch("/")
 async def user_coin_energy_update(coin: int, energy: int, user: Annotated[UserId, Depends(get_current_user)]):
-    user = await User.get(user.id)
     if user:
         if coin > 0:
+            old_coin = coin - user.coins
+            current_time = datetime.now()
             await User.update(user.id, coins=coin, energy=energy)
             if user.id in active_tasks:
                 active_tasks[user.id].cancel()
             await update_status(user)
             task = asyncio.create_task(increase_energy(user.id, energy, user.max_energy))
             active_tasks[user.id] = task
-
+            await friends_update_coin(user, old_coin)
             return {"ok": True, "user": user}
         else:
             raise HTTPException(status_code=404, detail="0 dan kichik son kevotdi qara")
