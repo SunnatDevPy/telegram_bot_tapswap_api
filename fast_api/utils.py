@@ -81,14 +81,6 @@ async def friends_detail(user_id):
     return list_
 
 
-async def friends_coin(user_id):
-    friends_price = 0
-    for i in await Referral.get_from_referral_id(user_id):
-        friends_price += i.hour_8_coin
-    print(friends_price)
-    return int((friends_price * 1.5) / 100)
-
-
 async def top_players_from_statu():
     list_ = []
     coun = 1

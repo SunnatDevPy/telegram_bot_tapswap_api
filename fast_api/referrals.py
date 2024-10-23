@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from db import User
 from db.models.model import Referral
 from fast_api.jwt_ import get_current_user
-from fast_api.utils import friends_coin, update_status
+from fast_api.utils import update_status
 
 referral_router = APIRouter(prefix='/referrals', tags=['Referral'])
 
@@ -81,7 +81,7 @@ async def referral_activate_user(user: Annotated[UserId, Depends(get_current_use
 
 @referral_router.post('/claim/')
 async def activate_user(user: Annotated[UserId, Depends(get_current_user)]):
-    coin = await friends_coin(user.id)
+    coin = user.hour_coin
     await update_status(user)
     if user.id in active_tasks:
         raise HTTPException(status_code=400, detail="Hozirgi vazifa davom etmoqda, kuting")
