@@ -67,6 +67,7 @@ async def user_list() -> list[UserList]:
 
 
 class UserPatch(BaseModel):
+    id: Optional[int] = None
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     username: Optional[str] = None
@@ -152,8 +153,8 @@ async def increase_energy(user_id, energy, max_energy):
 
 # coin energy update
 @user_router.patch("/detail/")
-async def user_patch_update(user: Annotated[UserId, Depends()], item: Annotated[UserPatch, Depends()]):
-    user = await User.get(user.id)
+async def user_patch_update(user_id: int, item: Annotated[UserPatch, Depends()]):
+    user = await User.get(user_id)
     if user:
         update_data = {k: v for k, v in item.dict().items() if v is not None}
         if update_data:
