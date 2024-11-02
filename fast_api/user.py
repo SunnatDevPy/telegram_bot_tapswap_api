@@ -61,7 +61,7 @@ async def user_add(user: Annotated[UserAdd, Depends()]):
 
 
 @user_router.get('')
-async def user_list() -> list[UserList]:
+async def user_list(event: Annotated[UserList, Depends(get_current_user)]) -> list[UserList]:
     users = await User.get_all()
     return users
 

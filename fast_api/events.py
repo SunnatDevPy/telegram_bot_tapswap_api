@@ -33,7 +33,7 @@ class UserId(BaseModel):
 
 
 @event_router.post("")
-async def event_add(event: Annotated[EventAdd, Depends()]):
+async def event_add(event: Annotated[EventAdd, Depends(get_current_user)]):
     event = await Event.create(**event.dict())
     users = await User.get_all()
     for i in users:
@@ -54,7 +54,7 @@ async def event_active_from_user(event_id: int, user: Annotated[UserId, Depends(
 
 
 @event_router.get('')
-async def event_list() -> list[EventList]:
+async def event_list(user: Annotated[UserId, Depends(get_current_user)]) -> list[EventList]:
     events = await Event.get_alls()
     return events
 
@@ -175,7 +175,8 @@ async def get_unique_event():
     unique_people = await remove_duplicates_events(user_events)
     return unique_people
 
-# @event_router.delete("/{event_id}")
-# async def event_delete(event_id: int):
-#     await Event.delete(event_id)
-#     return {"ok": True, 'id': event_id}
+
+@event_router.delete("/{event_id}")
+async def event_delete(event_id: int):
+    await Event.delete(event_id)
+    return {"ok": True, 'id': event_id}
