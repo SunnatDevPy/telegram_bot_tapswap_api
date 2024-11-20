@@ -21,8 +21,8 @@ def get_response(part_url, querystring=None):
     conn = http.client.HTTPSConnection("api-football-v1.p.rapidapi.com")
 
     headers = {
-        'x-rapidapi-key': "666fb3a3f0mshd6f49ac99388165p10de96jsn4e667b43a669",
-        'x-rapidapi-host': "api-football-v1.p.rapidapi.com"
+        # 'x-rapidapi-key': "666fb3a3f0mshd6f49ac99388165p10de96jsn4e667b43a669",
+        # 'x-rapidapi-host': "api-football-v1.p.rapidapi.com"
     }
     conn.request("GET", "/v2/odds/league/865927/bookmaker/5?page=2", headers=headers)
     url = f"https://api-football-v1.p.rapidapi.com/v3/{part_url}"

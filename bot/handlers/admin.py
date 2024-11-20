@@ -3,10 +3,10 @@ from aiogram.enums import ChatMemberStatus
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 
-from bot.buttuns.inline import send_text, confirm_inl, link, admins, show_channels, make_channels
+from bot.buttuns.inline import send_text, confirm_inl, link, admins, show_channels
 from bot.state.states import SendTextState, AddAdmin, ForwardState
-from db import User
 from db import Channel
+from db import User
 
 admin_router = Router()
 
